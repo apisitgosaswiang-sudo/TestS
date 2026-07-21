@@ -4,7 +4,6 @@ import {
   renderLanding,
   renderTrainerLogin,
   renderMemberDashboard,
-  renderTrainerPlaceholder,
   renderNotFound
 } from "./views.js";
 import {
@@ -12,13 +11,14 @@ import {
   renderExerciseTracker,
   renderWorkoutComplete
 } from "./workout.js";
+import { renderTrainerDashboard } from "./trainer-dashboard.js";
 
 registerRoute("/", renderLanding);
 registerRoute("/trainer-login", renderTrainerLogin);
 registerRoute("/member", renderMemberDashboard);
 registerRoute("/workout", renderWorkoutOverview);
 registerRoute("/workout-complete", renderWorkoutComplete);
-registerRoute("/trainer", renderTrainerPlaceholder);
+registerRoute("/trainer", renderTrainerDashboard);
 registerRoute("/404", () => {
   const path = window.location.hash.replace(/^#/, "");
   const match = path.match(/^\/workout-exercise-(\d+)$/);

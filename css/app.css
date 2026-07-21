@@ -799,3 +799,275 @@
     font-size: .62rem;
   }
 }
+
+
+.trainer-page {
+  padding: 0;
+  background: #F7F7F8;
+}
+
+.trainer-screen {
+  min-height: 100dvh;
+  padding: max(24px, env(safe-area-inset-top)) 18px calc(106px + env(safe-area-inset-bottom));
+}
+
+.trainer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.trainer-header p {
+  margin: 0 0 2px;
+  color: var(--muted);
+  font-size: .88rem;
+}
+
+.trainer-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  letter-spacing: -.04em;
+}
+
+.trainer-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 26px;
+  padding: 22px;
+  border-radius: 26px;
+  color: white;
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,.15), transparent 34%),
+    linear-gradient(145deg, #18181B, #3F3F46);
+  box-shadow: 0 18px 40px rgba(24,24,27,.16);
+}
+
+.trainer-hero h2 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: -.05em;
+}
+
+.trainer-hero > div > span {
+  color: rgba(255,255,255,.7);
+  font-size: .8rem;
+}
+
+.hero-ring {
+  display: grid;
+  width: 82px;
+  height: 82px;
+  place-items: center;
+  align-content: center;
+  border: 6px solid rgba(255,255,255,.18);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+}
+
+.hero-ring strong,
+.hero-ring small {
+  display: block;
+}
+
+.hero-ring strong {
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.hero-ring small {
+  margin-top: 3px;
+  color: rgba(255,255,255,.66);
+  font-size: .62rem;
+}
+
+.trainer-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+  margin-top: 18px;
+}
+
+.trainer-stat {
+  padding: 15px;
+}
+
+.trainer-stat-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+.trainer-stat-icon.success {
+  color: var(--success);
+  background: #F0FDF4;
+}
+
+.trainer-stat-icon.progress {
+  color: #2563EB;
+  background: #EFF6FF;
+}
+
+.trainer-stat-icon.muted {
+  color: var(--muted);
+  background: #F4F4F5;
+}
+
+.trainer-stat-icon.warning {
+  color: var(--warning);
+  background: #FFF7ED;
+}
+
+.trainer-stat p {
+  margin: 12px 0 4px;
+  color: var(--muted);
+  font-size: .74rem;
+}
+
+.trainer-stat strong {
+  font-size: 1.65rem;
+}
+
+.trainer-alert {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 15px;
+}
+
+.trainer-alert-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--primary-soft);
+}
+
+.trainer-alert p {
+  margin: 0 0 3px;
+  color: var(--muted);
+  font-size: .72rem;
+}
+
+.trainer-alert strong {
+  font-size: .92rem;
+}
+
+.trainer-alert button {
+  border: 0;
+  color: var(--primary);
+  background: transparent;
+  font-size: .74rem;
+  font-weight: 800;
+}
+
+.trainer-section {
+  margin-top: 28px;
+}
+
+.activity-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 13px;
+}
+
+.activity-item {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 42px 1fr auto;
+  align-items: center;
+  gap: 11px;
+  padding: 13px;
+  text-align: left;
+}
+
+.activity-avatar {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  background: var(--text);
+  font-weight: 800;
+}
+
+.activity-copy {
+  min-width: 0;
+}
+
+.activity-copy strong,
+.activity-copy small,
+.activity-copy em {
+  display: block;
+}
+
+.activity-copy strong {
+  font-size: .9rem;
+}
+
+.activity-copy small {
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: .72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-copy em {
+  margin-top: 4px;
+  color: #A1A1AA;
+  font-size: .65rem;
+  font-style: normal;
+}
+
+.status-pill {
+  padding: 6px 8px;
+  border-radius: 999px;
+  font-size: .62rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status-completed {
+  color: var(--success);
+  background: #F0FDF4;
+}
+
+.status-in_progress {
+  color: #2563EB;
+  background: #EFF6FF;
+}
+
+.status-not_started {
+  color: var(--muted);
+  background: #F4F4F5;
+}
+
+.trainer-bottom-nav {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.trainer-bottom-nav .nav-item small {
+  font-size: .6rem;
+}
+
+.trainer-loading {
+  display: flex;
+  min-height: calc(100dvh - 48px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.trainer-loading p {
+  color: var(--muted);
+}

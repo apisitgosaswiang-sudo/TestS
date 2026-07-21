@@ -71,3 +71,13 @@ CLOB คือแพลตฟอร์มที่เชื่อม Trainer แ
 - Workout Progress
 - Finish Workout
 - Completed Activity for Trainer Dashboard
+
+
+## Pack 04 Completed
+
+- Trainer Dashboard
+- Member Status Summary
+- Completed / In Progress / Not Started
+- Need Attention
+- Package Expiring
+- Recent Activity

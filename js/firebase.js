@@ -99,3 +99,32 @@ export async function saveWorkoutSession(code, sessionId, payload) {
     return false;
   }
 }
+
+
+export async function getAllMembers() {
+  if (!firebaseReady || !database || !dbApi) return null;
+
+  try {
+    const snapshot = await dbApi.get(
+      dbApi.ref(database, "clob/members")
+    );
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (error) {
+    console.warn("Could not load members:", error);
+    return null;
+  }
+}
+
+export async function getWorkoutSessions() {
+  if (!firebaseReady || !database || !dbApi) return null;
+
+  try {
+    const snapshot = await dbApi.get(
+      dbApi.ref(database, "clob/workoutSessions")
+    );
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (error) {
+    console.warn("Could not load workout sessions:", error);
+    return null;
+  }
+}

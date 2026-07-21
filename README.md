@@ -1,25 +1,20 @@
-# CLOB Alpha 0.3 — Pack 03
+# CLOB Alpha 0.4 — Pack 04
 
-Pack 03 เพิ่มระบบ Workout Tracking สำหรับฝั่งสมาชิก
+Pack 04 เพิ่ม Trainer Dashboard
 
 ## ฟีเจอร์ใหม่
 
-- รายการท่าออกกำลังกายของวัน
-- เปิดดูแต่ละท่า
-- บันทึก Weight
-- บันทึก Reps
-- บันทึก RPE
-- บันทึกทีละเซต
-- เติมน้ำหนักจากเซตก่อนให้อัตโนมัติ
-- Rest Timer หลังบันทึกเซต
-- ข้ามเวลาพักได้
-- Progress ของ Workout
-- กลับมาทำต่อได้
-- Finish Workout
-- Workout Complete Summary
-- บันทึก Session ลง Local Storage
-- พยายาม Sync Session ไป Firebase
-- อัปเดตสถานะสมาชิกให้ Trainer Dashboard ใช้ต่อใน Pack 04
+- Trainer Dashboard แบบ Mobile-first
+- จำนวน Members
+- Completed
+- In Progress
+- Not Started
+- Need Attention
+- Package Expiring
+- Recent Workout Activity
+- อ่านสถานะ Workout จาก Firebase
+- รองรับข้อมูล Demo เมื่อ Firebase ยังไม่มีข้อมูล
+- Bottom Navigation ฝั่ง Trainer
 
 ## วิธีติดตั้ง
 
@@ -31,52 +26,36 @@ Pack 03 เพิ่มระบบ Workout Tracking สำหรับฝั่
 
 ## รหัสทดสอบ
 
-### Member
-`12345`
-
 ### Trainer
 PIN `0409`
 
-## วิธีทดสอบ Workout
+### Member
+รหัส `12345`
 
-1. Login ด้วย `12345`
-2. กด `เริ่ม Workout`
-3. เลือกท่า
-4. กรอก KG / REPS / RPE
-5. กด `บันทึก`
-6. Rest Timer จะเริ่ม
-7. ทำครบทุกเซต
-8. กลับหน้า Workout Overview
-9. กด `Finish Workout`
+## วิธีทดสอบการเชื่อมกัน
 
-## Firebase Paths
+1. Login ฝั่ง Member ด้วย `12345`
+2. เริ่ม Workout และบันทึกเซต
+3. Finish Workout
+4. Logout
+5. Login ฝั่ง Trainer ด้วย PIN `0409`
+6. ดูสถานะ Recent Activity
+
+## Firebase Paths ที่อ่าน
 
 ```text
 clob/
-  workoutSessions/
-    {memberCode}/
-      {sessionId}/
   members/
-    {memberCode}/
-      activity/
-      lastWorkoutStatus
-      lastWorkoutTitle
-      lastWorkoutUpdatedAt
+  workoutSessions/
 ```
-
-## หมายเหตุ
-
-Firebase Rules จาก Pack 01 อนุญาตผู้ใช้ Anonymous ที่ล็อกอินแล้วอ่านและเขียนใต้ `clob` ได้
-ก่อนใช้งานจริงกับลูกค้าหลายคน ต้องปรับ Rules ให้จำกัดสิทธิ์ Trainer และ Member แยกกัน
 
 ## Pack ถัดไป
 
-Pack 04 — Trainer Dashboard
+Pack 05 — Members
 
-- จำนวน Members วันนี้
-- Completed
-- In Progress
-- Not Started
-- Need Attention
-- Package Expiring
-- Recent Workout Activity
+- รายชื่อสมาชิกทั้งหมด
+- ค้นหาและกรอง
+- Member Detail
+- Package Status
+- Workout History
+- ปุ่มเพิ่มสมาชิก

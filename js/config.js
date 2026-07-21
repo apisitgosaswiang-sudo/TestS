@@ -1,6 +1,6 @@
 export const APP_CONFIG = {
   appName: "CLOB",
-  version: "Alpha 0.3 — Pack 03",
+  version: "Alpha 0.4 — Pack 04",
   trainerPin: "0409",
   memberCodeLength: 5,
   defaultRestSeconds: 90
