@@ -15,6 +15,7 @@ import { renderTrainerDashboard } from "./trainer-dashboard.js";
 import { renderMembersPage, renderMemberDetail } from "./members-page.js";
 import { renderProgramsPage, renderProgramBuilder } from "./program-builder.js";
 import { renderExerciseLibraryPage } from "./exercise-library-page.js";
+import { renderProgressPhotosPage } from "./progress-photos-page.js";
 
 registerRoute("/", renderLanding);
 registerRoute("/trainer-login", renderTrainerLogin);
@@ -37,6 +38,12 @@ registerRoute("/404", () => {
   const memberMatch = path.match(/^\/member-detail-(\d{5})$/);
   if (memberMatch) {
     renderMemberDetail(memberMatch[1]);
+    return;
+  }
+
+  const progressPhotosMatch = path.match(/^\/progress-photos-(\d{5})$/);
+  if (progressPhotosMatch) {
+    renderProgressPhotosPage(progressPhotosMatch[1]);
     return;
   }
 

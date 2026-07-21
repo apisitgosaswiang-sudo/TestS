@@ -120,3 +120,18 @@ CLOB คือแพลตฟอร์มที่เชื่อม Trainer แ
 - Video and GIF links
 - Program Builder integration
 - Firebase and Local Storage persistence
+
+
+## Pack 08 Part 1 Completed
+
+- Firebase Storage SDK
+- Confirm-before-upload photo flow
+- 4:5 crop canvas
+- Drag and zoom
+- WebP compression at 1080 × 1350
+- Profile photo upload
+- Front / side / back progress photos
+- Pending previews
+- Multi-photo upload confirmation
+- Upload progress and retry
+- Realtime Database metadata

@@ -1,92 +1,80 @@
-# CLOB Alpha 0.7 — Pack 07
+# CLOB Alpha 0.8 — Pack 08 Part 1
 
-Pack 07 เพิ่ม Exercise Library แบบจัดการข้อมูลได้จริง และเชื่อมกับ Program Builder
+ระบบรูป Progress ที่เชื่อม Firebase Storage จริง
 
-## Dashboard
+## Features
 
-คำทักทายในหน้า Trainer Dashboard เปลี่ยนเป็น:
+- Member Profile Photo
+- Front / Side / Back Progress Photos
+- เลือกรูปก่อนอัปโหลด
+- Crop 4:5
+- ลากรูปเพื่อจัดตำแหน่ง
+- Zoom
+- แปลงเป็น WebP
+- Resize เป็น 1080 × 1350 px
+- Quality 80%
+- Pending preview
+- ยืนยันรูปทั้งหมดก่อน Upload
+- Upload progress
+- Retry เมื่ออัปโหลดไม่สำเร็จ
+- เก็บ URL และ Storage path ใน Realtime Database
 
-```text
-Good Morning,
-Coach First
-```
+## วิธีเข้าใช้งาน
 
-คำว่า Coach First ใช้เฉพาะส่วนทักทายเท่านั้น  
-ส่วนอื่นใช้ข้อความสั้นและตรงความหมาย
+1. Trainer Login
+2. Members
+3. เลือกสมาชิก
+4. กดแท็บ `Photos`
+5. เลือก Front / Side / Back
+6. Crop แล้วกด `Use Photo`
+7. ตรวจรูป
+8. กด `Save Photos`
+9. ยืนยัน `Upload`
 
-## Exercise Library
+รูปจะยังไม่อัปโหลดทันทีหลังเลือก เพื่อป้องกันการเลือกรูปผิด
 
-- Search Exercise
-- All / Favorites / Recent
-- Filter by Category
-- Exercise Detail
-- Primary Muscle
-- Secondary Muscles
-- Equipment
-- Level
-- Coach Tip
-- Video URL
-- GIF URL
-- Add Exercise
-- Edit Exercise
-- Delete Exercise
-- Favorite
-- Recent Viewed
-- Local Storage fallback
-- Firebase sync
-
-## Categories
-
-- Squat
-- Hinge
-- Push
-- Pull
-- Lunge
-- Core
-- Carry
-- Rotation
-- Isolation
-- Mobility
-- Cardio
-
-## Program Builder
-
-ปุ่ม Add Exercise จะโหลดข้อมูลจาก Exercise Library กลาง  
-ท่าที่เพิ่มใหม่จึงสามารถนำไปใช้ใน Program Builder ได้
-
-## Install
-
-1. แตก ZIP
-2. อัปโหลดไฟล์ทั้งหมดทับ Repository เดิม
-3. Commit
-4. รอ Vercel Deploy
-5. Hard Refresh หรือเปิด Incognito หากยังเห็นไฟล์เก่า
-
-## Trainer PIN
+## Firebase Storage Path
 
 ```text
-0409
+members/
+  {memberCode}/
+    profile/
+      profile_{timestamp}.webp
+    checkins/
+      {checkinId}/
+        front_{timestamp}.webp
+        side_{timestamp}.webp
+        back_{timestamp}.webp
 ```
 
-## Firebase Paths
+## Realtime Database Path
 
 ```text
 clob/
-  exercises/
-    {exerciseId}/
-  exercisePreferences/
-    {anonymousUid}/
-      favorites/
-      recent/
+  members/
+    {memberCode}/
+      profilePhoto
+      profilePhotoPath
+
+  progress/
+    {memberCode}/
+      checkins/
+        {checkinId}/
+          photos/
 ```
 
-## Pack 08
+## Storage Rules
 
-Progress & Analytics
+ไฟล์อ้างอิงอยู่ที่:
 
-- Weight
-- Body Fat
-- Measurements
-- Photos
-- PR
-- Charts
+```text
+firebase/storage.rules
+```
+
+Rules ต้อง Publish ใน Firebase Console ก่อนทดสอบ
+
+## Install
+
+แตก ZIP แล้วอัปโหลดไฟล์ทั้งหมดทับ Pack07 จากนั้น Commit และรอ Vercel Deploy
+
+หากยังเห็นเวอร์ชันเก่า ให้ Hard Refresh หรือเปิด Incognito
