@@ -1,26 +1,23 @@
-# Workout Tracker V2.4.0 — Customer Foundation Beta
+# Workout Tracker V2.4.1 — Monthly Package Fix
 
-เวอร์ชันทดสอบแรกของระบบบริหารลูกเทรนสำหรับ Personal Trainer โดยระบบช่วยจัดการข้อมูล แต่ไม่สร้างหรือเลือกโปรแกรมแทนเทรนเนอร์
+เวอร์ชันพร้อมสำหรับตั้งค่าข้อมูลลูกเทรนคืนนี้
 
 ## ฟีเจอร์หลัก
-
+- Trainer login PIN 0409
+- Dashboard
 - Customer Management
-- ค้นหาลูกเทรนด้วยชื่อ รหัส เบอร์โทร หรือเป้าหมาย
-- จำนวนครั้งทั้งหมดและจำนวนครั้งคงเหลือ
-- เป้าหมายและ Coach Note
-- สถานะแพ็กเกจและวันคงเหลือ
-- รองรับข้อมูลเดิมจาก V2.3.x
-- Database schema version 2.4
-- Firebase Anonymous Authentication และ Realtime Database
+- เพิ่ม แก้ไข ค้นหา และลบลูกเทรน
+- แพ็กเกจ จำนวนครั้ง และวันหมดอายุ
+- Program Templates
+- Exercise Library
+- Member login ด้วยรหัส 5 หลัก
+- Firebase Realtime Database
+- จดจำสถานะการเข้าสู่ระบบในแท็บเดิม
+- แก้ favicon 404
 
-## โครงสร้างไฟล์
+## วิธีอัปโหลด
+แตก ZIP แล้วลากไฟล์ทั้งหมดขึ้น GitHub หน้า Upload files จากนั้น Commit และรอ Vercel Deploy
 
-- `index.html` — หน้าเว็บหลัก
-- `style.css` — รูปแบบหน้าจอ
-- `app.js` — การทำงานหลักของแอป
-- `firebase.js` — การเชื่อมต่อ Firebase
-- `config.js` — เวอร์ชันและค่าคงที่ของระบบ
-- `customers.js` — โมดูลข้อมูลลูกเทรน
-- `UPLOAD-GUIDE.md` — วิธีอัปโหลดผ่าน GitHub Web
 
-แพ็กเกจนี้ไม่มีโฟลเดอร์ย่อย เพื่อให้อัปโหลดผ่านหน้าเว็บ GitHub ได้โดยตรง.
+## Package model
+ระบบใช้แพ็กเกจแบบรายเดือน โดยกำหนดวันเริ่มต้นและจำนวนเดือน ระบบจะคำนวณวันหมดอายุให้อัตโนมัติ ไม่มีการนับจำนวนครั้งในแพ็กเกจ

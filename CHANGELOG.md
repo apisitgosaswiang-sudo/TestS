@@ -1,15 +1,16 @@
 # Changelog
 
-## 2.4.0 — Customer Foundation Beta
-- เพิ่ม Customer Management KPI
-- เพิ่มข้อมูลลูกเทรน: phone, goal, coachNote, sessionsTotal, sessionsRemaining
-- เพิ่มการค้นหาจากข้อมูลโปรไฟล์
-- เพิ่มฐาน modular architecture รุ่นแรก
-- เพิ่ม `meta.schemaVersion = 2.4`
-- รักษาความเข้ากันได้กับ Firebase data เดิม
-- ไม่มี AI Program Assistant และไม่มีระบบสร้างโปรแกรมอัตโนมัติ
+## V2.4.1 Monthly Package Fix
+- เปลี่ยนแพ็กเกจลูกเทรนเป็นแบบรายเดือนเท่านั้น
+- นำจำนวนครั้งและจำนวนครั้งคงเหลือออกจากหน้าจอ
+- วันหมดอายุคำนวณจากวันเริ่มต้น + จำนวนเดือน
+- แก้การเปลี่ยนเมนูทุกหน้าให้เลื่อนกลับด้านบนทันที
 
-## Web Upload Ready Package
-- ย้าย `config.js` และ `customers.js` มาไว้ที่โฟลเดอร์หลัก
-- ปรับ import paths ให้ทำงานโดยไม่ต้องมีโฟลเดอร์ `src`
-- เพิ่มคู่มือ `UPLOAD-GUIDE.md`
+# Changelog
+
+## 2.4.1 — Tonight Setup Ready
+- ปรับเวอร์ชันสำหรับตั้งค่าข้อมูลจริง
+- จดจำ Trainer/Member login ใน session
+- เพิ่ม favicon แบบฝังในหน้าเว็บ
+- ปรับ cache-busting เป็น 2.4.1
+- คงข้อมูลและโครงสร้าง Firebase เดิม
