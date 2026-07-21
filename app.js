@@ -1,4 +1,4 @@
-window.__WORKOUT_BUILD__ = "2.3.6-template-exercise-picker";
+window.__WORKOUT_BUILD__ = "2.3.7-simple-template-day-builder";
 import { auth, dataRef, get, set, signInAnonymously } from "./firebase.js";
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
@@ -102,7 +102,7 @@ function packageBadge(customer){
 
 const emptyData=()=>({customers:[],programs:{},logs:{},catalog:{categories:[]},bodyStats:{},programTemplates:[]});
 let saveTimer=null,ready=false;
-let S={data:null,role:null,screen:"customers",dashboardMode:true,customerId:null,activeDayId:null,customerTab:"dashboard",programTab:"overview",entries:{},showAdd:false,lastCode:null,showTemplateForm:false,editingTemplateId:null,templateExerciseSearch:""};
+let S={data:null,role:null,screen:"customers",dashboardMode:true,customerId:null,activeDayId:null,customerTab:"dashboard",programTab:"overview",entries:{},showAdd:false,lastCode:null,showTemplateForm:false,editingTemplateId:null,editingTemplateDayId:null,templateExerciseSearch:"",showTemplateAdvanced:{},templatePickerOpen:false};
 
 function asArray(value){
   if(Array.isArray(value))return value.filter(Boolean);
@@ -118,20 +118,43 @@ function normalize(raw){
   d.programs=d.programs&&typeof d.programs==="object"?d.programs:{};
   d.logs=d.logs&&typeof d.logs==="object"?d.logs:{};
   d.bodyStats=d.bodyStats&&typeof d.bodyStats==="object"?d.bodyStats:{};
-  d.programTemplates=asArray(d.programTemplates).map((template,index)=>({
-    ...template,
-    id:String(template?.id??uid()),
-    name:String(template?.name??`Program ${index+1}`),
-    category:String(template?.category??"General"),
-    description:String(template?.description??""),
-    createdAt:String(template?.createdAt??isoToday()),
-    exercises:asArray(template?.exercises).map(item=>({
+  d.programTemplates=asArray(d.programTemplates).map((template,index)=>{
+    const legacyExercises=asArray(template?.exercises).map(item=>({
       exerciseId:String(item?.exerciseId??item?.id??""),
       sets:Number(item?.sets??3),
       reps:String(item?.reps??"10-12"),
-      rest:String(item?.rest??"60 sec")
-    })).filter(item=>item.exerciseId)
-  }));
+      rest:String(item?.rest??"60 sec"),
+      rpe:String(item?.rpe??""),
+      note:String(item?.note??"")
+    })).filter(item=>item.exerciseId);
+
+    const days=asArray(template?.days).map((day,dayIndex)=>({
+      id:String(day?.id??uid()),
+      name:String(day?.name??`Day ${dayIndex+1}`),
+      exercises:asArray(day?.exercises).map(item=>({
+        exerciseId:String(item?.exerciseId??item?.id??""),
+        sets:Number(item?.sets??3),
+        reps:String(item?.reps??"10-12"),
+        rest:String(item?.rest??"60 sec"),
+        rpe:String(item?.rpe??""),
+        note:String(item?.note??"")
+      })).filter(item=>item.exerciseId)
+    }));
+
+    if(!days.length&&legacyExercises.length){
+      days.push({id:uid(),name:"Day 1",exercises:legacyExercises});
+    }
+
+    return {
+      ...template,
+      id:String(template?.id??uid()),
+      name:String(template?.name??`Program ${index+1}`),
+      category:String(template?.category??"General"),
+      description:String(template?.description??""),
+      createdAt:String(template?.createdAt??isoToday()),
+      days
+    };
+  });
 
   const catalogSource=d.catalog&&typeof d.catalog==="object"?d.catalog:{};
   d.catalog={categories:asArray(catalogSource.categories).map(cat=>({
@@ -871,7 +894,7 @@ function renderTemplatesPlaceholder(){
   const templates=asArray(S.data.programTemplates);
   const library=getExerciseLibraryItems();
   const editingTemplate=templates.find(item=>String(item.id)===String(S.editingTemplateId));
-  const selectedIds=new Set(asArray(editingTemplate?.exercises).map(item=>String(item.exerciseId)));
+  const editingDay=editingTemplate?.days?.find(day=>String(day.id)===String(S.editingTemplateDayId));
   const search=String(S.templateExerciseSearch||"").trim().toLowerCase();
   const filteredLibrary=library.filter(item=>
     !search||
@@ -885,22 +908,22 @@ function renderTemplatesPlaceholder(){
 
     <section class="hero-dashboard template-placeholder-hero">
       <div class="hero-eyebrow">📋 PROGRAM TEMPLATES</div>
-      <h1 class="hero-title">ชุดโปรแกรมออกกำลังกาย</h1>
-      <p class="hero-subtitle">เลือกท่าจาก Exercise Library ที่มีอยู่ในระบบ แล้วนำมาเก็บเป็น Template สำหรับใช้ซ้ำ</p>
+      <h1 class="hero-title">สร้างโปรแกรมให้เสร็จในไม่กี่นาที</h1>
+      <p class="hero-subtitle">เพิ่มวันฝึก เลือกท่าจาก Exercise Library และกำหนด Sets / Reps แบบง่าย ๆ</p>
       <div class="hero-actions">
         <button class="btn btn-primary" id="toggleTemplateForm">
-          ${S.showTemplateForm?"ปิดแบบฟอร์ม":"＋ สร้างชุดโปรแกรม"}
+          ${S.showTemplateForm?"ปิดแบบฟอร์ม":"＋ สร้าง Template"}
         </button>
       </div>
     </section>
 
     ${S.showTemplateForm?`
       <div class="card template-form-card">
-        <h3>สร้างชุดโปรแกรมใหม่</h3>
+        <h3>สร้าง Template ใหม่</h3>
         <div class="grid2">
           <label class="field-label">
-            ชื่อชุดโปรแกรม
-            <input class="input" id="templateName" placeholder="เช่น Full Body Beginner">
+            ชื่อ Template
+            <input class="input" id="templateName" placeholder="เช่น Upper / Lower 4 Days">
           </label>
           <label class="field-label">
             หมวดหมู่
@@ -917,24 +940,27 @@ function renderTemplatesPlaceholder(){
         </div>
         <label class="field-label" style="margin-top:10px">
           รายละเอียด
-          <textarea class="input" id="templateDescription" rows="3" placeholder="อธิบายเป้าหมายหรือกลุ่มลูกเทรนที่เหมาะกับโปรแกรมนี้"></textarea>
+          <textarea class="input" id="templateDescription" rows="2" placeholder="เช่น เหมาะสำหรับผู้เริ่มต้น ฝึก 4 วัน/สัปดาห์"></textarea>
         </label>
         <button class="btn btn-primary btn-block" id="saveTemplateBasic" style="margin-top:12px">
-          บันทึกชุดโปรแกรม
+          บันทึกและเริ่มเพิ่มวันฝึก
         </button>
       </div>`:""}
 
     <div class="template-summary-row">
       <div>
         <b>${templates.length}</b>
-        <span>ชุดโปรแกรมที่บันทึกไว้</span>
+        <span>Template ที่บันทึกไว้</span>
       </div>
-      <span class="badge badge-accent">${library.length} LIBRARY EXERCISES</span>
+      <span class="badge badge-accent">${library.length} EXERCISES</span>
     </div>
 
     <div class="template-basic-list">
-      ${templates.length?templates.map(template=>`
-        <div class="template-basic-card ${String(template.id)===String(S.editingTemplateId)?"template-active":""}">
+      ${templates.length?templates.map(template=>{
+        const exerciseCount=asArray(template.days).reduce((sum,day)=>sum+asArray(day.exercises).length,0);
+        const isOpen=String(template.id)===String(S.editingTemplateId);
+        return `
+        <div class="template-basic-card ${isOpen?"template-active":""}">
           <div class="row-between">
             <div style="min-width:0">
               <span class="template-category">${esc(template.category)}</span>
@@ -944,60 +970,151 @@ function renderTemplatesPlaceholder(){
             <button class="btn-danger" data-delete-basic-template="${template.id}">ลบ</button>
           </div>
 
-          <div class="template-exercise-preview">
-            ${asArray(template.exercises).length?asArray(template.exercises).map((item,index)=>`
-              <span>${index+1}. ${esc(getTemplateExerciseName(item.exerciseId))}</span>
-            `).join(""):`<span class="muted">ยังไม่มีท่าใน Template</span>`}
+          <div class="template-mini-stats">
+            <span>${asArray(template.days).length} วัน</span>
+            <span>${exerciseCount} ท่า</span>
           </div>
 
           <div class="template-basic-footer">
             <span>สร้างเมื่อ ${esc(template.createdAt||"-")}</span>
-            <button class="btn btn-ghost btn-small" data-edit-template-exercises="${template.id}">
-              ${String(template.id)===String(S.editingTemplateId)?"ปิดรายการท่า":"เลือกท่าจาก Library"}
+            <button class="btn btn-ghost btn-small" data-open-template="${template.id}">
+              ${isOpen?"ปิด":"จัดโปรแกรม"}
             </button>
           </div>
-        </div>`).join(""):`
+
+          ${isOpen?`
+            <div class="template-day-builder">
+              <div class="row-between">
+                <div>
+                  <b>วันฝึก</b>
+                  <small>แตะวันที่ต้องการแก้ไข</small>
+                </div>
+                <button class="btn btn-primary btn-small" data-add-template-day="${template.id}">＋ เพิ่มวัน</button>
+              </div>
+
+              <div class="template-day-list">
+                ${asArray(template.days).length?asArray(template.days).map((day,dayIndex)=>{
+                  const activeDay=String(day.id)===String(S.editingTemplateDayId);
+                  return `
+                  <button class="template-day-row ${activeDay?"is-active":""}" data-open-template-day="${day.id}">
+                    <span class="template-day-number">${dayIndex+1}</span>
+                    <span class="template-day-info">
+                      <b>${esc(day.name)}</b>
+                      <small>${asArray(day.exercises).length} ท่า</small>
+                    </span>
+                    <span class="template-day-arrow">›</span>
+                  </button>`;
+                }).join(""):`
+                  <div class="empty-state compact">
+                    ยังไม่มีวันฝึก<br><span class="small">กด “เพิ่มวัน” เพื่อเริ่ม</span>
+                  </div>`}
+              </div>
+
+              ${editingDay&&String(editingTemplate.id)===String(template.id)?`
+                <div class="template-day-editor">
+                  <div class="row-between">
+                    <label class="field-label template-day-name-field">
+                      ชื่อวันฝึก
+                      <input class="input" id="templateDayName" value="${esc(editingDay.name)}">
+                    </label>
+                    <button class="btn-danger" id="deleteTemplateDay">ลบวัน</button>
+                  </div>
+
+                  <div class="template-exercise-list">
+                    ${asArray(editingDay.exercises).length?asArray(editingDay.exercises).map((item,index)=>{
+                      const exercise=library.find(ex=>String(ex.id)===String(item.exerciseId));
+                      const key=`${template.id}:${editingDay.id}:${index}`;
+                      const advanced=!!S.showTemplateAdvanced[key];
+                      return `
+                      <div class="template-program-exercise">
+                        <div class="template-program-head">
+                          <div>
+                            <span class="template-order">${index+1}</span>
+                            <b>${esc(exercise?.name||"Exercise")}</b>
+                            <small>${esc(exercise?.category||"Exercise Library")}</small>
+                          </div>
+                          <button class="icon-btn danger" data-remove-day-exercise="${index}">×</button>
+                        </div>
+
+                        <div class="template-simple-fields">
+                          <label>Sets
+                            <input class="input compact-input" type="number" min="1" value="${item.sets}" data-day-field="${index}:sets">
+                          </label>
+                          <label>Reps
+                            <input class="input compact-input" value="${esc(item.reps)}" data-day-field="${index}:reps">
+                          </label>
+                        </div>
+
+                        <button class="advanced-toggle" data-toggle-advanced="${key}">
+                          ${advanced?"ซ่อนรายละเอียด":"ตั้งค่าเพิ่มเติม"}
+                        </button>
+
+                        ${advanced?`
+                          <div class="template-advanced-fields">
+                            <label>Rest
+                              <input class="input compact-input" value="${esc(item.rest||"")}" data-day-field="${index}:rest">
+                            </label>
+                            <label>RPE
+                              <input class="input compact-input" value="${esc(item.rpe||"")}" data-day-field="${index}:rpe">
+                            </label>
+                            <label class="wide">หมายเหตุ
+                              <input class="input compact-input" value="${esc(item.note||"")}" data-day-field="${index}:note">
+                            </label>
+                          </div>`:""}
+                      </div>`;
+                    }).join(""):`
+                      <div class="empty-state compact">
+                        ยังไม่มีท่าในวันนี้
+                      </div>`}
+                  </div>
+
+                  <button class="btn btn-primary btn-block" id="openExercisePicker">
+                    ＋ เพิ่มท่าจาก Exercise Library
+                  </button>
+
+                  <button class="btn btn-ghost btn-block" id="saveTemplateDay" style="margin-top:8px">
+                    บันทึก Day
+                  </button>
+                </div>`:""}
+            </div>`:""}
+        </div>`}).join(""):`
         <div class="empty-state">
           <span class="emoji">🗂️</span>
-          ยังไม่มีชุดโปรแกรม<br>
-          <span class="small">กด “สร้างชุดโปรแกรม” เพื่อเริ่มรายการแรก</span>
+          ยังไม่มี Template<br>
+          <span class="small">กด “สร้าง Template” เพื่อเริ่มรายการแรก</span>
         </div>`}
     </div>
 
-    ${editingTemplate?`
-      <div class="card template-picker-card">
-        <div class="section-heading">
-          <div>
-            <h3>เลือกท่าให้ ${esc(editingTemplate.name)}</h3>
-            <small>ดึงข้อมูลจาก Exercise Library โดยตรง</small>
+    ${editingDay?`
+      <div class="template-picker-sheet ${S.templatePickerOpen?"is-open":""}" id="templatePickerSheet">
+        <div class="template-picker-backdrop" id="closeExercisePicker"></div>
+        <div class="template-picker-panel">
+          <div class="sheet-handle"></div>
+          <div class="row-between">
+            <div>
+              <h3>เลือกท่าออกกำลังกาย</h3>
+              <small>ดึงจาก Exercise Library</small>
+            </div>
+            <button class="icon-btn" id="closeExercisePickerTop">×</button>
           </div>
-          <span class="badge badge-accent">${selectedIds.size} SELECTED</span>
+          <input class="input" id="templateExerciseSearch" value="${esc(S.templateExerciseSearch)}"
+            placeholder="ค้นหาชื่อท่า หมวดหมู่ หรือกล้ามเนื้อ">
+
+          <div class="template-library-list">
+            ${filteredLibrary.length?filteredLibrary.map(exercise=>`
+              <button class="template-library-pick" data-pick-exercise="${exercise.id}">
+                <span>
+                  <b>${esc(exercise.name)}</b>
+                  <small>${esc(exercise.category)}${exercise.muscle?` · ${esc(exercise.muscle)}`:""}</small>
+                </span>
+                <span class="add-circle">＋</span>
+              </button>`).join(""):`
+              <div class="empty-state">
+                <span class="emoji">🏋️</span>
+                ${library.length?"ไม่พบท่าที่ค้นหา":"ยังไม่มีท่าใน Exercise Library"}
+              </div>`}
+          </div>
         </div>
-
-        <input class="input" id="templateExerciseSearch" value="${esc(S.templateExerciseSearch)}"
-          placeholder="ค้นหาชื่อท่า หมวดหมู่ หรือกล้ามเนื้อ">
-
-        <div class="template-library-list">
-          ${filteredLibrary.length?filteredLibrary.map(exercise=>`
-            <label class="template-library-item ${selectedIds.has(String(exercise.id))?"is-selected":""}">
-              <input type="checkbox"
-                data-template-exercise-id="${exercise.id}"
-                ${selectedIds.has(String(exercise.id))?"checked":""}>
-              <span class="template-library-main">
-                <b>${esc(exercise.name)}</b>
-                <small>${esc(exercise.category)}${exercise.muscle?` · ${esc(exercise.muscle)}`:""}${exercise.equipment?` · ${esc(exercise.equipment)}`:""}</small>
-              </span>
-              <span class="template-check">✓</span>
-            </label>`).join(""):`
-            <div class="empty-state">
-              <span class="emoji">🏋️</span>
-              ${library.length?"ไม่พบท่าที่ค้นหา":"ยังไม่มีท่าใน Exercise Library"}
-            </div>`}
-        </div>
-
-        <button class="btn btn-primary btn-block" id="saveTemplateExercises">
-          บันทึกท่าใน Template
-        </button>
       </div>`:""}`;
 
   bindNav();
@@ -1012,68 +1129,140 @@ function renderTemplatesPlaceholder(){
     const name=$("#templateName").value.trim();
     const category=$("#templateCategory").value;
     const description=$("#templateDescription").value.trim();
+    if(!name)return alert("กรุณากรอกชื่อ Template");
 
-    if(!name)return alert("กรุณากรอกชื่อชุดโปรแกรม");
-
+    const firstDay={id:uid(),name:"Day 1",exercises:[]};
     const newTemplate={
       id:uid(),
       name,
       category,
       description,
       createdAt:isoToday(),
-      exercises:[]
+      days:[firstDay]
     };
 
     S.data.programTemplates.push(newTemplate);
     S.showTemplateForm=false;
     S.editingTemplateId=newTemplate.id;
+    S.editingTemplateDayId=firstDay.id;
     save();
-    showToast("บันทึกชุดโปรแกรมแล้ว");
+    showToast("สร้าง Template แล้ว");
     renderFromTop();
   };
 
-  $$("[data-edit-template-exercises]").forEach(button=>button.onclick=()=>{
-    const id=button.dataset.editTemplateExercises;
-    S.editingTemplateId=String(S.editingTemplateId)===String(id)?null:id;
-    S.templateExerciseSearch="";
+  $$("[data-open-template]").forEach(button=>button.onclick=()=>{
+    const id=button.dataset.openTemplate;
+    if(String(S.editingTemplateId)===String(id)){
+      S.editingTemplateId=null;
+      S.editingTemplateDayId=null;
+    }else{
+      S.editingTemplateId=id;
+      const template=templates.find(item=>String(item.id)===String(id));
+      S.editingTemplateDayId=template?.days?.[0]?.id||null;
+    }
     renderFromTop();
   });
+
+  $$("[data-add-template-day]").forEach(button=>button.onclick=()=>{
+    const template=templates.find(item=>String(item.id)===String(button.dataset.addTemplateDay));
+    if(!template)return;
+    const nextNumber=asArray(template.days).length+1;
+    const newDay={id:uid(),name:`Day ${nextNumber}`,exercises:[]};
+    template.days.push(newDay);
+    S.editingTemplateDayId=newDay.id;
+    save();
+    showToast("เพิ่มวันฝึกแล้ว");
+    renderFromTop();
+  });
+
+  $$("[data-open-template-day]").forEach(button=>button.onclick=()=>{
+    S.editingTemplateDayId=button.dataset.openTemplateDay;
+    renderFromTop();
+  });
+
+  if($("#deleteTemplateDay"))$("#deleteTemplateDay").onclick=()=>{
+    if(!editingTemplate||!editingDay)return;
+    if(!confirm(`ลบ "${editingDay.name}" ใช่หรือไม่?`))return;
+    editingTemplate.days=editingTemplate.days.filter(day=>String(day.id)!==String(editingDay.id));
+    S.editingTemplateDayId=editingTemplate.days[0]?.id||null;
+    save();
+    showToast("ลบวันฝึกแล้ว");
+    renderFromTop();
+  };
+
+  $$("[data-remove-day-exercise]").forEach(button=>button.onclick=()=>{
+    const index=Number(button.dataset.removeDayExercise);
+    editingDay.exercises.splice(index,1);
+    save();
+    showToast("ลบท่าแล้ว");
+    renderFromTop();
+  });
+
+  $$("[data-toggle-advanced]").forEach(button=>button.onclick=()=>{
+    const key=button.dataset.toggleAdvanced;
+    S.showTemplateAdvanced[key]=!S.showTemplateAdvanced[key];
+    renderFromTop();
+  });
+
+  if($("#saveTemplateDay"))$("#saveTemplateDay").onclick=()=>{
+    if(!editingDay)return;
+    editingDay.name=$("#templateDayName").value.trim()||editingDay.name;
+    $$("[data-day-field]").forEach(input=>{
+      const [indexText,field]=input.dataset.dayField.split(":");
+      const index=Number(indexText);
+      if(!editingDay.exercises[index])return;
+      editingDay.exercises[index][field]=field==="sets"?Number(input.value||1):input.value.trim();
+    });
+    save();
+    showToast("บันทึก Day แล้ว");
+    renderFromTop();
+  };
+
+  if($("#openExercisePicker"))$("#openExercisePicker").onclick=()=>{
+    S.templatePickerOpen=true;
+    renderFromTop();
+  };
+
+  const closePicker=()=>{
+    S.templatePickerOpen=false;
+    S.templateExerciseSearch="";
+    renderFromTop();
+  };
+  if($("#closeExercisePicker"))$("#closeExercisePicker").onclick=closePicker;
+  if($("#closeExercisePickerTop"))$("#closeExercisePickerTop").onclick=closePicker;
 
   if($("#templateExerciseSearch"))$("#templateExerciseSearch").oninput=(event)=>{
     S.templateExerciseSearch=event.target.value;
     renderFromTop();
   };
 
-  if($("#saveTemplateExercises"))$("#saveTemplateExercises").onclick=()=>{
-    const template=templates.find(item=>String(item.id)===String(S.editingTemplateId));
-    if(!template)return;
-
-    const checked=$$("[data-template-exercise-id]:checked").map(input=>String(input.dataset.templateExerciseId));
-    const currentById=Object.fromEntries(asArray(template.exercises).map(item=>[String(item.exerciseId),item]));
-
-    template.exercises=checked.map(exerciseId=>currentById[exerciseId]||({
+  $$("[data-pick-exercise]").forEach(button=>button.onclick=()=>{
+    if(!editingDay)return;
+    const exerciseId=button.dataset.pickExercise;
+    editingDay.exercises.push({
       exerciseId,
       sets:3,
       reps:"10-12",
-      rest:"60 sec"
-    }));
-
+      rest:"60 sec",
+      rpe:"",
+      note:""
+    });
     save();
-    showToast(`บันทึก ${checked.length} ท่าแล้ว`);
+    showToast("เพิ่มท่าแล้ว");
     renderFromTop();
-  };
+  });
 
   $$("[data-delete-basic-template]").forEach(button=>button.onclick=()=>{
     const template=templates.find(item=>String(item.id)===String(button.dataset.deleteBasicTemplate));
     if(!template)return;
-    if(!confirm(`ลบชุดโปรแกรม "${template.name}" ใช่หรือไม่?`))return;
-
-    S.data.programTemplates=S.data.programTemplates.filter(
-      item=>String(item.id)!==String(template.id)
-    );
-    if(String(S.editingTemplateId)===String(template.id))S.editingTemplateId=null;
+    if(!confirm(`ลบ Template "${template.name}" ใช่หรือไม่?`))return;
+    S.data.programTemplates=S.data.programTemplates.filter(item=>String(item.id)!==String(template.id));
+    if(String(S.editingTemplateId)===String(template.id)){
+      S.editingTemplateId=null;
+      S.editingTemplateDayId=null;
+    }
     save();
-    showToast("ลบชุดโปรแกรมแล้ว");
+    showToast("ลบ Template แล้ว");
     renderFromTop();
   });
 }
