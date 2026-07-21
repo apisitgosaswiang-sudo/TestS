@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "clob": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

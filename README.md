@@ -1,28 +1,64 @@
-# CLOB Alpha 0.1
+# CLOB Alpha 0.2 — Pack 02
 
-Mobile-first PWA เชื่อม Firebase Realtime Database และ Anonymous Authentication แล้ว
+Pack 02 เพิ่ม Member Dashboard แบบใช้งานได้ต่อจาก Pack 01
 
-## ฟีเจอร์ในรอบนี้
-- Firebase Anonymous Authentication
-- แยกข้อมูลผู้ใช้ตาม `clob/users/{uid}`
-- Client CRUD
-- แพ็กเกจรายเดือน: วันเริ่มต้น / จำนวนเดือน / วันหมดอายุ
-- Master Exercise Library 192 ท่า
-- Search / Category / Favorites / Recent
-- White Theme
+## ฟีเจอร์ใหม่
+
+- Member Home แบบ Mobile-first
+- Good Morning / Afternoon / Evening
+- Today's Workout
+- Coach Message
+- Start Workout button
+- Weekly Progress
+- น้ำหนักล่าสุดและแนวโน้ม
+- Package days / sessions left
+- Next Session
 - Bottom Navigation
-- Auto-scroll to top
+- โหลดข้อมูลจาก Firebase Realtime Database เมื่อมีข้อมูล
+- ใช้ข้อมูล Demo อัตโนมัติเมื่อยังไม่มีข้อมูลใน Firebase
 
 ## วิธีอัปโหลด
-1. สำรองไฟล์เดิมหรือดาวน์โหลด ZIP จาก GitHub ก่อน
-2. แตก ZIP นี้
-3. GitHub repository `clob` → Add file → Upload files
-4. ลากไฟล์และโฟลเดอร์ทั้งหมดขึ้นไป
-5. Commit message: `CLOB Alpha 0.1 - Firebase and exercise library`
-6. รอ Vercel Deploy
 
-## Firebase Rules
-นำเนื้อหา `database.rules.json` ไปวางที่ Firebase → Realtime Database → Rules แล้วกด Publish
+1. แตกไฟล์ ZIP
+2. เลือกไฟล์และโฟลเดอร์ทั้งหมดภายใน `clob-pack02`
+3. อัปโหลดทับไฟล์ทั้งหมดใน GitHub Repository `clob`
+4. Commit changes
+5. รอ Vercel Deploy
 
-## หมายเหตุด้านความปลอดภัย
-Firebase web config เป็นข้อมูลที่อยู่ในฝั่งเว็บได้ตามรูปแบบของ Firebase แต่สิทธิ์เข้าถึงข้อมูลต้องควบคุมด้วย Database Rules
+## รหัสทดสอบ
+
+### Member Dashboard แบบมีข้อมูลครบ
+`12345`
+
+### Member รหัสอื่น
+กรอกตัวเลข 5 หลักใดก็ได้ ระบบจะแสดงค่าเริ่มต้น
+
+### Trainer
+PIN `0409`
+
+## Firebase Data Path ที่รองรับ
+
+```text
+clob/
+  members/
+    12345/
+      name
+      greetingName
+      coachName
+      coachMessage
+      workout/
+      week/
+      weight/
+      package/
+      nextSession/
+```
+
+ตัวอย่างข้อมูลอยู่ที่:
+
+`data/member-demo.json`
+
+## หมายเหตุสำคัญ
+
+ปุ่ม Start Workout ใน Pack 02 จะบันทึกเวลาเริ่มลง Local Storage และพยายามเขียน Activity ไป Firebase
+
+หน้าบันทึก Weight / Reps / RPE รายเซตจะเพิ่มใน Pack 03

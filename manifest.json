@@ -1,0 +1,17 @@
+{
+  "name": "CLOB",
+  "short_name": "CLOB",
+  "description": "แพลตฟอร์มเชื่อมเทรนเนอร์และสมาชิก",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#E11D48",
+  "icons": [
+    {
+      "src": "assets/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
