@@ -1107,3 +1107,105 @@ body::after{
   font-size:9px;
 }
 
+
+/* =========================
+   V2.3.6 TEMPLATE EXERCISE PICKER
+========================= */
+.template-active{
+  border-color:rgba(69,210,199,.5);
+}
+.template-exercise-preview{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin-top:12px;
+  padding:10px 11px;
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+}
+.template-exercise-preview span{
+  color:var(--text2);
+  font-size:10px;
+}
+.template-exercise-preview .muted{
+  color:var(--muted);
+}
+.template-picker-card{
+  margin-top:14px;
+  border-color:rgba(69,210,199,.35);
+}
+.template-picker-card .section-heading{
+  margin-top:0;
+}
+.template-picker-card .section-heading small{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:9px;
+}
+.template-library-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:430px;
+  overflow-y:auto;
+  margin:12px 0;
+  padding-right:2px;
+}
+.template-library-item{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:#151523;
+  cursor:pointer;
+}
+.template-library-item input{
+  width:17px;
+  height:17px;
+  accent-color:var(--mint);
+}
+.template-library-main{
+  min-width:0;
+}
+.template-library-main b{
+  display:block;
+  font-size:11px;
+}
+.template-library-main small{
+  display:block;
+  overflow:hidden;
+  margin-top:2px;
+  color:var(--muted);
+  font-size:9px;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.template-check{
+  width:24px;
+  height:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(255,255,255,.04);
+  color:transparent;
+  font-size:11px;
+}
+.template-library-item.is-selected{
+  border-color:rgba(69,210,199,.42);
+  background:rgba(69,210,199,.07);
+}
+.template-library-item.is-selected .template-check{
+  background:var(--mint);
+  color:#071411;
+}
+.btn-small{
+  min-height:32px;
+  padding:7px 10px;
+  font-size:9px;
+}
+

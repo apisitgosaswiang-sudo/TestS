@@ -1,4 +1,4 @@
-window.__WORKOUT_BUILD__ = "2.3.5-template-create";
+window.__WORKOUT_BUILD__ = "2.3.6-template-exercise-picker";
 import { auth, dataRef, get, set, signInAnonymously } from "./firebase.js";
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
@@ -102,7 +102,7 @@ function packageBadge(customer){
 
 const emptyData=()=>({customers:[],programs:{},logs:{},catalog:{categories:[]},bodyStats:{},programTemplates:[]});
 let saveTimer=null,ready=false;
-let S={data:null,role:null,screen:"customers",dashboardMode:true,customerId:null,activeDayId:null,customerTab:"dashboard",programTab:"overview",entries:{},showAdd:false,lastCode:null,showTemplateForm:false};
+let S={data:null,role:null,screen:"customers",dashboardMode:true,customerId:null,activeDayId:null,customerTab:"dashboard",programTab:"overview",entries:{},showAdd:false,lastCode:null,showTemplateForm:false,editingTemplateId:null,templateExerciseSearch:""};
 
 function asArray(value){
   if(Array.isArray(value))return value.filter(Boolean);
@@ -124,7 +124,13 @@ function normalize(raw){
     name:String(template?.name??`Program ${index+1}`),
     category:String(template?.category??"General"),
     description:String(template?.description??""),
-    createdAt:String(template?.createdAt??isoToday())
+    createdAt:String(template?.createdAt??isoToday()),
+    exercises:asArray(template?.exercises).map(item=>({
+      exerciseId:String(item?.exerciseId??item?.id??""),
+      sets:Number(item?.sets??3),
+      reps:String(item?.reps??"10-12"),
+      rest:String(item?.rest??"60 sec")
+    })).filter(item=>item.exerciseId)
   }));
 
   const catalogSource=d.catalog&&typeof d.catalog==="object"?d.catalog:{};
@@ -831,8 +837,48 @@ function renderCustomers(){
   };
 }
 
+
+function getExerciseLibraryItems(){
+  const catalog=S.data.catalog||{};
+  const categories=asArray(catalog.categories);
+  const items=[];
+
+  categories.forEach((category,categoryIndex)=>{
+    const categoryName=String(category?.name??category?.title??`Category ${categoryIndex+1}`);
+    const exercises=asArray(category?.exercises??category?.items);
+
+    exercises.forEach((exercise,exerciseIndex)=>{
+      const id=String(exercise?.id??`${categoryIndex}-${exerciseIndex}`);
+      items.push({
+        id,
+        name:String(exercise?.name??exercise?.title??`Exercise ${exerciseIndex+1}`),
+        category:categoryName,
+        muscle:String(exercise?.muscle??exercise?.target??""),
+        equipment:String(exercise?.equipment??""),
+        video:String(exercise?.video??exercise?.url??"")
+      });
+    });
+  });
+
+  return items;
+}
+
+function getTemplateExerciseName(exerciseId){
+  return getExerciseLibraryItems().find(item=>String(item.id)===String(exerciseId))?.name||"Exercise";
+}
+
 function renderTemplatesPlaceholder(){
   const templates=asArray(S.data.programTemplates);
+  const library=getExerciseLibraryItems();
+  const editingTemplate=templates.find(item=>String(item.id)===String(S.editingTemplateId));
+  const selectedIds=new Set(asArray(editingTemplate?.exercises).map(item=>String(item.exerciseId)));
+  const search=String(S.templateExerciseSearch||"").trim().toLowerCase();
+  const filteredLibrary=library.filter(item=>
+    !search||
+    item.name.toLowerCase().includes(search)||
+    item.category.toLowerCase().includes(search)||
+    item.muscle.toLowerCase().includes(search)
+  );
 
   $("#app").innerHTML=`
     ${nav("templates")}
@@ -840,7 +886,7 @@ function renderTemplatesPlaceholder(){
     <section class="hero-dashboard template-placeholder-hero">
       <div class="hero-eyebrow">📋 PROGRAM TEMPLATES</div>
       <h1 class="hero-title">ชุดโปรแกรมออกกำลังกาย</h1>
-      <p class="hero-subtitle">สร้างชื่อและรายละเอียดของชุดโปรแกรมไว้ก่อน แล้วค่อยเพิ่มท่าในเวอร์ชันถัดไป</p>
+      <p class="hero-subtitle">เลือกท่าจาก Exercise Library ที่มีอยู่ในระบบ แล้วนำมาเก็บเป็น Template สำหรับใช้ซ้ำ</p>
       <div class="hero-actions">
         <button class="btn btn-primary" id="toggleTemplateForm">
           ${S.showTemplateForm?"ปิดแบบฟอร์ม":"＋ สร้างชุดโปรแกรม"}
@@ -869,12 +915,10 @@ function renderTemplatesPlaceholder(){
             </select>
           </label>
         </div>
-
         <label class="field-label" style="margin-top:10px">
           รายละเอียด
           <textarea class="input" id="templateDescription" rows="3" placeholder="อธิบายเป้าหมายหรือกลุ่มลูกเทรนที่เหมาะกับโปรแกรมนี้"></textarea>
         </label>
-
         <button class="btn btn-primary btn-block" id="saveTemplateBasic" style="margin-top:12px">
           บันทึกชุดโปรแกรม
         </button>
@@ -885,12 +929,12 @@ function renderTemplatesPlaceholder(){
         <b>${templates.length}</b>
         <span>ชุดโปรแกรมที่บันทึกไว้</span>
       </div>
-      <span class="badge badge-accent">SYNCED</span>
+      <span class="badge badge-accent">${library.length} LIBRARY EXERCISES</span>
     </div>
 
     <div class="template-basic-list">
       ${templates.length?templates.map(template=>`
-        <div class="template-basic-card">
+        <div class="template-basic-card ${String(template.id)===String(S.editingTemplateId)?"template-active":""}">
           <div class="row-between">
             <div style="min-width:0">
               <span class="template-category">${esc(template.category)}</span>
@@ -899,9 +943,18 @@ function renderTemplatesPlaceholder(){
             </div>
             <button class="btn-danger" data-delete-basic-template="${template.id}">ลบ</button>
           </div>
+
+          <div class="template-exercise-preview">
+            ${asArray(template.exercises).length?asArray(template.exercises).map((item,index)=>`
+              <span>${index+1}. ${esc(getTemplateExerciseName(item.exerciseId))}</span>
+            `).join(""):`<span class="muted">ยังไม่มีท่าใน Template</span>`}
+          </div>
+
           <div class="template-basic-footer">
             <span>สร้างเมื่อ ${esc(template.createdAt||"-")}</span>
-            <span>0 ท่า</span>
+            <button class="btn btn-ghost btn-small" data-edit-template-exercises="${template.id}">
+              ${String(template.id)===String(S.editingTemplateId)?"ปิดรายการท่า":"เลือกท่าจาก Library"}
+            </button>
           </div>
         </div>`).join(""):`
         <div class="empty-state">
@@ -909,7 +962,43 @@ function renderTemplatesPlaceholder(){
           ยังไม่มีชุดโปรแกรม<br>
           <span class="small">กด “สร้างชุดโปรแกรม” เพื่อเริ่มรายการแรก</span>
         </div>`}
-    </div>`;
+    </div>
+
+    ${editingTemplate?`
+      <div class="card template-picker-card">
+        <div class="section-heading">
+          <div>
+            <h3>เลือกท่าให้ ${esc(editingTemplate.name)}</h3>
+            <small>ดึงข้อมูลจาก Exercise Library โดยตรง</small>
+          </div>
+          <span class="badge badge-accent">${selectedIds.size} SELECTED</span>
+        </div>
+
+        <input class="input" id="templateExerciseSearch" value="${esc(S.templateExerciseSearch)}"
+          placeholder="ค้นหาชื่อท่า หมวดหมู่ หรือกล้ามเนื้อ">
+
+        <div class="template-library-list">
+          ${filteredLibrary.length?filteredLibrary.map(exercise=>`
+            <label class="template-library-item ${selectedIds.has(String(exercise.id))?"is-selected":""}">
+              <input type="checkbox"
+                data-template-exercise-id="${exercise.id}"
+                ${selectedIds.has(String(exercise.id))?"checked":""}>
+              <span class="template-library-main">
+                <b>${esc(exercise.name)}</b>
+                <small>${esc(exercise.category)}${exercise.muscle?` · ${esc(exercise.muscle)}`:""}${exercise.equipment?` · ${esc(exercise.equipment)}`:""}</small>
+              </span>
+              <span class="template-check">✓</span>
+            </label>`).join(""):`
+            <div class="empty-state">
+              <span class="emoji">🏋️</span>
+              ${library.length?"ไม่พบท่าที่ค้นหา":"ยังไม่มีท่าใน Exercise Library"}
+            </div>`}
+        </div>
+
+        <button class="btn btn-primary btn-block" id="saveTemplateExercises">
+          บันทึกท่าใน Template
+        </button>
+      </div>`:""}`;
 
   bindNav();
   window.scrollTo({top:0,behavior:"smooth"});
@@ -926,17 +1015,51 @@ function renderTemplatesPlaceholder(){
 
     if(!name)return alert("กรุณากรอกชื่อชุดโปรแกรม");
 
-    S.data.programTemplates.push({
+    const newTemplate={
       id:uid(),
       name,
       category,
       description,
-      createdAt:isoToday()
-    });
+      createdAt:isoToday(),
+      exercises:[]
+    };
 
+    S.data.programTemplates.push(newTemplate);
     S.showTemplateForm=false;
+    S.editingTemplateId=newTemplate.id;
     save();
     showToast("บันทึกชุดโปรแกรมแล้ว");
+    renderFromTop();
+  };
+
+  $$("[data-edit-template-exercises]").forEach(button=>button.onclick=()=>{
+    const id=button.dataset.editTemplateExercises;
+    S.editingTemplateId=String(S.editingTemplateId)===String(id)?null:id;
+    S.templateExerciseSearch="";
+    renderFromTop();
+  });
+
+  if($("#templateExerciseSearch"))$("#templateExerciseSearch").oninput=(event)=>{
+    S.templateExerciseSearch=event.target.value;
+    renderFromTop();
+  };
+
+  if($("#saveTemplateExercises"))$("#saveTemplateExercises").onclick=()=>{
+    const template=templates.find(item=>String(item.id)===String(S.editingTemplateId));
+    if(!template)return;
+
+    const checked=$$("[data-template-exercise-id]:checked").map(input=>String(input.dataset.templateExerciseId));
+    const currentById=Object.fromEntries(asArray(template.exercises).map(item=>[String(item.exerciseId),item]));
+
+    template.exercises=checked.map(exerciseId=>currentById[exerciseId]||({
+      exerciseId,
+      sets:3,
+      reps:"10-12",
+      rest:"60 sec"
+    }));
+
+    save();
+    showToast(`บันทึก ${checked.length} ท่าแล้ว`);
     renderFromTop();
   };
 
@@ -948,6 +1071,7 @@ function renderTemplatesPlaceholder(){
     S.data.programTemplates=S.data.programTemplates.filter(
       item=>String(item.id)!==String(template.id)
     );
+    if(String(S.editingTemplateId)===String(template.id))S.editingTemplateId=null;
     save();
     showToast("ลบชุดโปรแกรมแล้ว");
     renderFromTop();
