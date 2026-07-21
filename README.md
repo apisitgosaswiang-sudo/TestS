@@ -1,50 +1,53 @@
-# CLOB Alpha 0.8 — Pack 08 Part 3
+# CLOB Alpha 0.9 — Pack 09 Part 1
 
-ส่วนสุดท้ายของ Pack08: Charts, Personal Records และ Progress summary
+Online Coaching Dashboard + Dynamic Trainer Avatar
 
 ## Features
 
-- Weight Chart
-- Body Fat Chart
-- Waist Chart
-- Canvas chart แบบไม่ใช้ library ภายนอก
-- Check-in Adherence
-- Before / After entry point
-- Personal Records
-- Add PR
-- Delete PR
-- Best PR per exercise
-- Firebase sync
-- Local Storage fallback
-- UI polish สำหรับหน้า Progress
+### Dynamic Trainer Avatar
+- ดึงอักษรตัวแรกจากชื่อ Coach อัตโนมัติ
+- `Coach First` แสดง `F`
+- รองรับภาษาอังกฤษและภาษาไทย
+- ตัดคำว่า `Coach` ออกก่อนหาอักษร
+- รองรับรูปโปรไฟล์ ถ้ามีรูปจะแสดงรูปก่อน
+- เปลี่ยนชื่อใน Trainer Profile แล้ว Avatar เปลี่ยนตามทันที
+- ใช้ utility กลาง `getAvatarInitial()`
 
-## วิธีเข้าใช้งาน
+### Online Coaching Dashboard
+- Check-ins Due
+- Waiting for Review
+- Overdue
+- Active Clients
+- Needs Attention
+- Notifications
+- Mark all notifications as read
+- กดรายการเพื่อเปิด Member Detail
 
-1. Trainer Login
-2. Members
-3. เลือกสมาชิก
-4. กด `Progress`
-5. กรอก Check-in อย่างน้อย 2 ครั้งเพื่อเห็นแนวโน้มกราฟ
-6. กด `+` ในส่วน Personal Records เพื่อเพิ่ม PR
+### Trainer Profile
+- เปลี่ยนชื่อ Coach
+- ใส่ Profile Photo URL
+- ใส่อีเมล
+- Preview Avatar แบบ Dynamic
 
-## Realtime Database Path
+## วิธีใช้งาน
+
+1. แตก ZIP
+2. อัปโหลดไฟล์ทั้งหมดทับ Pack08 Part 3
+3. Commit ไป GitHub
+4. รอ Vercel Deploy
+5. เปิด Trainer Dashboard
+6. กด Avatar เพื่อแก้ชื่อ Coach
+
+## Dynamic Avatar Examples
 
 ```text
-clob/
-  progress/
-    {memberCode}/
-      checkins/
-      prs/
+Coach First -> F
+Coach Alice -> A
+สมชาย -> ส
 ```
 
-## Install
+## Pack09 Roadmap
 
-แตก ZIP แล้วอัปโหลดไฟล์ทั้งหมดทับ Pack08 Part 2 จากนั้น Commit และรอ Vercel Deploy
-
-หากยังเห็นไฟล์เก่า ให้ Hard Refresh หรือเปิด Incognito
-
-## Pack08 Complete
-
-- Part 1: Photo Upload
-- Part 2: Check-ins & Timeline
-- Part 3: Charts, PR & Before/After
+- Part 1: Dashboard + Dynamic Avatar + Notifications
+- Part 2: Weekly Check-in + Coach Review
+- Part 3: Coaching Plan + Adherence + UI Polish

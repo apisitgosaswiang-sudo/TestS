@@ -163,3 +163,14 @@ CLOB คือแพลตฟอร์มที่เชื่อม Trainer แ
 - Progress UI polish
 
 ## Pack 08 Complete
+
+
+## Pack 09 Part 1 Completed
+
+- Online coaching dashboard
+- Dynamic trainer avatar
+- Trainer profile settings
+- Needs Attention
+- Notification center
+- Mark all notifications read
+- Member navigation

@@ -17,6 +17,8 @@ import { renderProgramsPage, renderProgramBuilder } from "./program-builder.js";
 import { renderExerciseLibraryPage } from "./exercise-library-page.js";
 import { renderProgressPhotosPage } from "./progress-photos-page.js";
 import { renderProgressPage } from "./progress-page.js";
+import { renderTrainerDashboardPage } from "./trainer-dashboard-page.js";
+import { renderTrainerSettingsPage } from "./trainer-settings-page.js";
 
 registerRoute("/", renderLanding);
 registerRoute("/trainer-login", renderTrainerLogin);
@@ -39,6 +41,11 @@ registerRoute("/404", () => {
   const memberMatch = path.match(/^\/member-detail-(\d{5})$/);
   if (memberMatch) {
     renderMemberDetail(memberMatch[1]);
+    return;
+  }
+
+  if (path === "/trainer-settings") {
+    renderTrainerSettingsPage();
     return;
   }
 

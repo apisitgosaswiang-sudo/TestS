@@ -1,4 +1,4 @@
-const CACHE_NAME = "clob-pack08-part3-v1";
+const CACHE_NAME = "clob-pack09-part1-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -21,6 +21,11 @@ const APP_SHELL = [
   "./js/progress-page.js",
   "./js/progress-charts.js",
   "./js/prs.js",
+  "./js/utils.js",
+  "./js/trainer-profile.js",
+  "./js/online-coaching.js",
+  "./js/trainer-dashboard-page.js",
+  "./js/trainer-settings-page.js",
   "./js/router.js",
   "./js/trainer.js",
   "./js/trainer-dashboard.js",

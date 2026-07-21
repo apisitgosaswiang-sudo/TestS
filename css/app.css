@@ -3069,3 +3069,327 @@
   gap: 11px;
   margin-top: 16px;
 }
+
+
+.online-dashboard {
+  min-height: 100dvh;
+  padding: max(28px, env(safe-area-inset-top)) 18px calc(48px + env(safe-area-inset-bottom));
+}
+
+.online-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.online-dashboard-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.online-dashboard-header h1 {
+  margin: 4px 0 0;
+  font-size: clamp(2.25rem, 9vw, 3.25rem);
+  line-height: .98;
+  letter-spacing: -.06em;
+}
+
+.dashboard-avatar-button {
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.dashboard-avatar,
+.trainer-settings-avatar,
+.attention-avatar {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  color: white;
+  background: #18181B;
+  font-weight: 850;
+}
+
+.dashboard-avatar {
+  width: 72px;
+  height: 72px;
+  font-size: 1.7rem;
+}
+
+.trainer-settings-avatar {
+  width: 72px;
+  height: 72px;
+  font-size: 1.65rem;
+}
+
+.attention-avatar {
+  width: 44px;
+  height: 44px;
+  font-size: .9rem;
+}
+
+.dashboard-avatar img,
+.trainer-settings-avatar img,
+.attention-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dashboard-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.dashboard-summary-card {
+  padding: 16px;
+}
+
+.dashboard-summary-card span,
+.dashboard-summary-card strong,
+.dashboard-summary-card small {
+  display: block;
+}
+
+.dashboard-summary-card span {
+  color: var(--muted);
+  font-size: .66rem;
+  font-weight: 750;
+}
+
+.dashboard-summary-card strong {
+  margin-top: 9px;
+  font-size: 1.7rem;
+  letter-spacing: -.04em;
+}
+
+.dashboard-summary-card small {
+  margin-top: 5px;
+  color: var(--primary);
+  font-size: .59rem;
+  font-weight: 750;
+}
+
+.dashboard-section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-top: 25px;
+}
+
+.dashboard-section-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.dashboard-section-head > button,
+.notification-actions button {
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: white;
+  font-size: .63rem;
+  font-weight: 750;
+}
+
+.attention-list,
+.notification-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.attention-card {
+  display: grid;
+  grid-template-columns: 44px 1fr 10px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.attention-copy strong,
+.attention-copy small {
+  display: block;
+}
+
+.attention-copy strong {
+  font-size: .76rem;
+}
+
+.attention-copy small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .62rem;
+}
+
+.attention-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #A1A1AA;
+}
+
+.attention-status.danger {
+  background: #E11D48;
+}
+
+.attention-status.warning {
+  background: #F59E0B;
+}
+
+.notification-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-actions > span {
+  display: grid;
+  min-width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 999px;
+  color: white;
+  background: var(--primary);
+  font-size: .62rem;
+  font-weight: 850;
+}
+
+.notification-card {
+  display: grid;
+  grid-template-columns: 8px 1fr auto;
+  align-items: start;
+  gap: 11px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.notification-card.is-unread {
+  border-color: rgba(225,29,72,.25);
+  background: rgba(225,29,72,.035);
+}
+
+.notification-card strong,
+.notification-card small {
+  display: block;
+}
+
+.notification-card strong {
+  font-size: .72rem;
+}
+
+.notification-card small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .61rem;
+  line-height: 1.4;
+}
+
+.notification-card time {
+  color: var(--muted);
+  font-size: .56rem;
+}
+
+.notification-dot {
+  width: 7px;
+  height: 7px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: #D4D4D8;
+}
+
+.notification-card.is-unread .notification-dot {
+  background: var(--primary);
+}
+
+.empty-notification {
+  padding: 22px;
+  text-align: center;
+}
+
+.empty-notification p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: .66rem;
+}
+
+.trainer-settings-screen {
+  min-height: 100dvh;
+  padding: max(22px, env(safe-area-inset-top)) 18px calc(44px + env(safe-area-inset-bottom));
+}
+
+.trainer-settings-header {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.trainer-settings-header h1 {
+  margin: 0;
+  font-size: 1.55rem;
+  letter-spacing: -.04em;
+}
+
+.trainer-profile-preview {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 15px;
+}
+
+.trainer-profile-preview strong,
+.trainer-profile-preview span {
+  display: block;
+}
+
+.trainer-profile-preview strong {
+  font-size: .88rem;
+}
+
+.trainer-profile-preview span {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: .65rem;
+  line-height: 1.4;
+}
+
+.trainer-profile-form {
+  display: grid;
+  gap: 13px;
+  margin-top: 14px;
+  padding: 16px;
+}
+
+.trainer-profile-form label > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: .64rem;
+  font-weight: 750;
+}
+
+.trainer-profile-form input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  outline: none;
+  background: #FAFAFA;
+}
