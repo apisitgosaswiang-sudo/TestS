@@ -92,3 +92,31 @@ CLOB คือแพลตฟอร์มที่เชื่อม Trainer แ
 - Personal Data
 - Package Overview
 - Latest Workout
+
+
+## Pack 06 Completed
+
+- Programs Dashboard
+- Program Builder
+- Workout Days
+- Exercise Blocks
+- Sets / Reps / Weight / RPE / Tempo / Rest / Notes
+- Exercise Search
+- Reorder Exercises
+- Assign Program to Member
+- Firebase + Local Storage persistence
+
+
+## Pack 07 Completed
+
+- Coach First greeting on Trainer Dashboard only
+- Short UI copy
+- Central Exercise Library
+- Search and category filters
+- Favorites and recent exercises
+- Exercise detail
+- Add / edit / delete exercise
+- Coach Tip
+- Video and GIF links
+- Program Builder integration
+- Firebase and Local Storage persistence

@@ -13,6 +13,8 @@ import {
 } from "./workout.js";
 import { renderTrainerDashboard } from "./trainer-dashboard.js";
 import { renderMembersPage, renderMemberDetail } from "./members-page.js";
+import { renderProgramsPage, renderProgramBuilder } from "./program-builder.js";
+import { renderExerciseLibraryPage } from "./exercise-library-page.js";
 
 registerRoute("/", renderLanding);
 registerRoute("/trainer-login", renderTrainerLogin);
@@ -21,6 +23,8 @@ registerRoute("/workout", renderWorkoutOverview);
 registerRoute("/workout-complete", renderWorkoutComplete);
 registerRoute("/trainer", renderTrainerDashboard);
 registerRoute("/members", renderMembersPage);
+registerRoute("/programs", renderProgramsPage);
+registerRoute("/library", renderExerciseLibraryPage);
 registerRoute("/404", () => {
   const path = window.location.hash.replace(/^#/, "");
 
@@ -33,6 +37,12 @@ registerRoute("/404", () => {
   const memberMatch = path.match(/^\/member-detail-(\d{5})$/);
   if (memberMatch) {
     renderMemberDetail(memberMatch[1]);
+    return;
+  }
+
+  const programMatch = path.match(/^\/program-builder-(.+)$/);
+  if (programMatch) {
+    renderProgramBuilder(programMatch[1]);
     return;
   }
 

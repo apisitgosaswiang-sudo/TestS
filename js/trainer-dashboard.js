@@ -40,7 +40,7 @@ export async function renderTrainerDashboard() {
         <span>CLOB</span>
       </div>
       <div class="loading-spinner"></div>
-      <p>กำลังโหลด Trainer Dashboard...</p>
+      <p>Loading...</p>
     </section>
   `);
 
@@ -51,7 +51,7 @@ export async function renderTrainerDashboard() {
       <header class="trainer-header">
         <div>
           <p>${greeting()} 👋</p>
-          <h1>Coach Apisit</h1>
+          <h1>Coach First</h1>
         </div>
         <button id="trainer-avatar" class="avatar-button" aria-label="เมนูเทรนเนอร์">A</button>
       </header>
@@ -197,13 +197,17 @@ export async function renderTrainerDashboard() {
         return;
       }
 
-      const labels = {
-        programs: "Program Builder จะมาใน Pack 06",
-        library: "Exercise Library จะมาใน Pack 07",
-        settings: "Settings จะเพิ่มใน Pack ถัดไป"
-      };
+      if (target === "programs") {
+        navigate("/programs");
+        return;
+      }
 
-      showToast(labels[target]);
+      if (target === "library") {
+        navigate("/library");
+        return;
+      }
+
+      showToast("Coming soon");
     });
   });
 }

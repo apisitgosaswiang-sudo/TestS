@@ -160,11 +160,11 @@ export async function renderMembersPage() {
           <span>👥</span>
           <small>Members</small>
         </button>
-        <button class="nav-item" data-coming="Program Builder จะมาใน Pack 06">
+        <button class="nav-item" data-route="/programs">
           <span>▤</span>
           <small>Programs</small>
         </button>
-        <button class="nav-item" data-coming="Exercise Library จะมาใน Pack 07">
+        <button class="nav-item" data-route="/library">
           <span>✦</span>
           <small>Library</small>
         </button>

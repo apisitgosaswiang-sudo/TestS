@@ -128,3 +128,118 @@ export async function getWorkoutSessions() {
     return null;
   }
 }
+
+
+export async function getPrograms() {
+  if (!firebaseReady || !database || !dbApi) return null;
+  try {
+    const snapshot = await dbApi.get(dbApi.ref(database, "clob/programs"));
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (error) {
+    console.warn("Could not load programs:", error);
+    return null;
+  }
+}
+
+export async function saveProgram(programId, payload) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(
+      dbApi.ref(database, `clob/programs/${programId}`),
+      payload
+    );
+    return true;
+  } catch (error) {
+    console.warn("Could not save program:", error);
+    return false;
+  }
+}
+
+export async function deleteProgram(programId) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(
+      dbApi.ref(database, `clob/programs/${programId}`),
+      null
+    );
+    return true;
+  } catch (error) {
+    console.warn("Could not delete program:", error);
+    return false;
+  }
+}
+
+export async function assignProgramToMember(memberCode, payload) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(
+      dbApi.ref(database, `clob/memberPrograms/${memberCode}`),
+      payload
+    );
+    return true;
+  } catch (error) {
+    console.warn("Could not assign program:", error);
+    return false;
+  }
+}
+
+
+export async function getExercises() {
+  if (!firebaseReady || !database || !dbApi) return null;
+  try {
+    const snapshot = await dbApi.get(dbApi.ref(database, "clob/exercises"));
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (error) {
+    console.warn("Could not load exercises:", error);
+    return null;
+  }
+}
+
+export async function saveExercise(exerciseId, payload) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(dbApi.ref(database, `clob/exercises/${exerciseId}`), payload);
+    return true;
+  } catch (error) {
+    console.warn("Could not save exercise:", error);
+    return false;
+  }
+}
+
+export async function deleteExercise(exerciseId) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(dbApi.ref(database, `clob/exercises/${exerciseId}`), null);
+    return true;
+  } catch (error) {
+    console.warn("Could not delete exercise:", error);
+    return false;
+  }
+}
+
+export async function getExercisePreferences() {
+  if (!firebaseReady || !database || !dbApi || !authUser) return null;
+  try {
+    const snapshot = await dbApi.get(
+      dbApi.ref(database, `clob/exercisePreferences/${authUser.uid}`)
+    );
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (error) {
+    console.warn("Could not load exercise preferences:", error);
+    return null;
+  }
+}
+
+export async function saveExercisePreferences(payload) {
+  if (!firebaseReady || !database || !dbApi || !authUser) return false;
+  try {
+    await dbApi.set(
+      dbApi.ref(database, `clob/exercisePreferences/${authUser.uid}`),
+      payload
+    );
+    return true;
+  } catch (error) {
+    console.warn("Could not save exercise preferences:", error);
+    return false;
+  }
+}
