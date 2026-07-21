@@ -371,3 +371,45 @@ export async function deleteMemberCheckin(memberCode, checkinId) {
     return false;
   }
 }
+
+
+export async function getMemberPRs(memberCode) {
+  if (!firebaseReady || !database || !dbApi) return null;
+  try {
+    const snapshot = await dbApi.get(
+      dbApi.ref(database, `clob/progress/${memberCode}/prs`)
+    );
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (error) {
+    console.warn("Could not load PRs:", error);
+    return null;
+  }
+}
+
+export async function saveMemberPR(memberCode, prId, payload) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(
+      dbApi.ref(database, `clob/progress/${memberCode}/prs/${prId}`),
+      payload
+    );
+    return true;
+  } catch (error) {
+    console.warn("Could not save PR:", error);
+    return false;
+  }
+}
+
+export async function deleteMemberPR(memberCode, prId) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(
+      dbApi.ref(database, `clob/progress/${memberCode}/prs/${prId}`),
+      null
+    );
+    return true;
+  } catch (error) {
+    console.warn("Could not delete PR:", error);
+    return false;
+  }
+}

@@ -1,37 +1,31 @@
-# CLOB Alpha 0.8 — Pack 08 Part 2
+# CLOB Alpha 0.8 — Pack 08 Part 3
 
-ระบบ Check-in และ Progress Timeline สำหรับสมาชิก
+ส่วนสุดท้ายของ Pack08: Charts, Personal Records และ Progress summary
 
 ## Features
 
-- Weight
-- Body Fat
-- Skeletal Muscle
-- Chest
-- Waist
-- Hip
-- Arm
-- Thigh
-- Note
-- Add Check-in
-- Edit Check-in
-- Delete Check-in
-- Latest metrics
-- Change from first entry
-- Progress Timeline
-- Realtime Database sync
+- Weight Chart
+- Body Fat Chart
+- Waist Chart
+- Canvas chart แบบไม่ใช้ library ภายนอก
+- Check-in Adherence
+- Before / After entry point
+- Personal Records
+- Add PR
+- Delete PR
+- Best PR per exercise
+- Firebase sync
 - Local Storage fallback
-- เชื่อมหน้า Photos จาก Part 1
+- UI polish สำหรับหน้า Progress
 
 ## วิธีเข้าใช้งาน
 
 1. Trainer Login
 2. Members
 3. เลือกสมาชิก
-4. กดแท็บ `Progress`
-5. กด `+`
-6. กรอกข้อมูล
-7. กด `Save`
+4. กด `Progress`
+5. กรอก Check-in อย่างน้อย 2 ครั้งเพื่อเห็นแนวโน้มกราฟ
+6. กด `+` ในส่วน Personal Records เพื่อเพิ่ม PR
 
 ## Realtime Database Path
 
@@ -40,29 +34,17 @@ clob/
   progress/
     {memberCode}/
       checkins/
-        {checkinId}/
-          date
-          weight
-          bodyFat
-          skeletalMuscle
-          chest
-          waist
-          hip
-          arm
-          thigh
-          note
+      prs/
 ```
 
 ## Install
 
-แตก ZIP แล้วอัปโหลดไฟล์ทั้งหมดทับ Pack08 Part 1 จากนั้น Commit และรอ Vercel Deploy
+แตก ZIP แล้วอัปโหลดไฟล์ทั้งหมดทับ Pack08 Part 2 จากนั้น Commit และรอ Vercel Deploy
 
 หากยังเห็นไฟล์เก่า ให้ Hard Refresh หรือเปิด Incognito
 
-## Pack 08 Part 3
+## Pack08 Complete
 
-- Charts
-- Before / After
-- PR Tracker
-- Adherence
-- UI polish
+- Part 1: Photo Upload
+- Part 2: Check-ins & Timeline
+- Part 3: Charts, PR & Before/After

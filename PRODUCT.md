@@ -150,3 +150,16 @@ CLOB คือแพลตฟอร์มที่เชื่อม Trainer แ
 - Timeline
 - Edit and delete
 - Realtime Database and local fallback
+
+
+## Pack 08 Part 3 Completed
+
+- Weight, body fat and waist charts
+- Check-in adherence summary
+- Before / after entry point
+- Personal records
+- Best PR per exercise
+- Firebase and local persistence
+- Progress UI polish
+
+## Pack 08 Complete

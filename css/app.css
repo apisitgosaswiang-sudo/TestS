@@ -2900,3 +2900,172 @@
   font-size: .61rem;
   text-align: center;
 }
+
+
+.progress-chart-card,
+.adherence-card,
+.before-after-card {
+  margin-top: 14px;
+  padding: 15px;
+}
+
+.progress-chart-head,
+.before-after-head,
+.pr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progress-chart-head h2,
+.adherence-card h2,
+.before-after-head h2,
+.pr-head h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.chart-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.chart-tabs button {
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: white;
+  font-size: .56rem;
+  font-weight: 750;
+}
+
+.chart-tabs button.is-active {
+  color: white;
+  border-color: #09090B;
+  background: #09090B;
+}
+
+#progress-line-chart {
+  display: block;
+  width: 100%;
+  height: 190px;
+  margin-top: 12px;
+}
+
+.adherence-score {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.adherence-score strong {
+  font-size: 1.45rem;
+}
+
+.adherence-score span {
+  color: var(--muted);
+  font-size: .65rem;
+}
+
+.adherence-bars {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.adherence-bars span {
+  height: 28px;
+  border-radius: 8px;
+  background: #F4F4F5;
+}
+
+.adherence-bars span.is-done {
+  background: var(--primary);
+}
+
+.before-after-card p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: .68rem;
+}
+
+.before-after-head button,
+.pr-head button {
+  min-height: 34px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 11px;
+  color: white;
+  background: #09090B;
+  font-size: .65rem;
+  font-weight: 750;
+}
+
+.pr-head {
+  margin-top: 24px;
+}
+
+.pr-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 11px;
+}
+
+.pr-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+}
+
+.pr-card span,
+.pr-card strong,
+.pr-card small {
+  display: block;
+}
+
+.pr-card span {
+  font-size: .68rem;
+  font-weight: 750;
+}
+
+.pr-card strong {
+  margin-top: 5px;
+  font-size: 1rem;
+}
+
+.pr-card small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .58rem;
+}
+
+.pr-card button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 10px;
+  color: #A1A1AA;
+  background: #F4F4F5;
+}
+
+.empty-pr {
+  padding: 22px 16px;
+  text-align: center;
+}
+
+.empty-pr p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: .67rem;
+}
+
+.pr-form-card form {
+  display: grid;
+  gap: 11px;
+  margin-top: 16px;
+}

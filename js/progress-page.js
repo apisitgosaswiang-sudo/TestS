@@ -1,5 +1,7 @@
 import { navigate } from "./router.js";
 import { loadMembers, getMemberByCode } from "./members.js";
+import { drawLineChart } from "./progress-charts.js";
+import { loadPRs, savePR, removePR, latestPRsByExercise } from "./prs.js";
 import {
   createBlankCheckin,
   loadCheckins,
@@ -13,7 +15,9 @@ import {
 const app = document.querySelector("#app");
 let member = null;
 let checkins = [];
+let prs = [];
 let editing = null;
+let activeChart = "weight";
 
 function esc(value = "") {
   return String(value)
@@ -49,7 +53,7 @@ export async function renderProgressPage(code) {
     return;
   }
 
-  checkins = await loadCheckins(member.code);
+  [checkins, prs] = await Promise.all([loadCheckins(member.code), loadPRs(member.code)]);
   render();
 }
 
@@ -91,6 +95,60 @@ function render() {
           ${metricCard("Muscle", formatMetric(muscle, "kg"), deltaText(calculateChange(checkins, "skeletalMuscle"), "kg"))}
         </section>
 
+        <section class="progress-chart-card card">
+          <div class="progress-chart-head">
+            <div>
+              <p class="section-label">TREND</p>
+              <h2>Progress Chart</h2>
+            </div>
+            <div class="chart-tabs">
+              ${["weight","bodyFat","waist"].map((field) => `
+                <button data-chart="${field}" class="${activeChart === field ? "is-active" : ""}">
+                  ${field === "bodyFat" ? "Body Fat" : field.charAt(0).toUpperCase() + field.slice(1)}
+                </button>
+              `).join("")}
+            </div>
+          </div>
+          <canvas id="progress-line-chart"></canvas>
+        </section>
+
+        <section class="adherence-card card">
+          <div>
+            <p class="section-label">CONSISTENCY</p>
+            <h2>Check-in Adherence</h2>
+          </div>
+          <div class="adherence-score">
+            <strong>${Math.min(100, checkins.length * 25)}%</strong>
+            <span>${checkins.length} Check-ins</span>
+          </div>
+          <div class="adherence-bars">
+            ${Array.from({length: 8}, (_, i) => `<span class="${i < Math.min(8, checkins.length) ? "is-done" : ""}"></span>`).join("")}
+          </div>
+        </section>
+
+        <section class="before-after-card card">
+          <div class="before-after-head">
+            <div>
+              <p class="section-label">PHOTOS</p>
+              <h2>Before / After</h2>
+            </div>
+            <button id="before-after-open">Open</button>
+          </div>
+          <p>Compare progress photos side by side.</p>
+        </section>
+
+        <section class="pr-head">
+          <div>
+            <p class="section-label">STRENGTH</p>
+            <h2>Personal Records</h2>
+          </div>
+          <button id="add-pr">＋</button>
+        </section>
+
+        <section class="pr-list">
+          ${prMarkup()}
+        </section>
+
         <section class="timeline-head">
           <div>
             <p class="section-label">CHECK-INS</p>
@@ -104,6 +162,7 @@ function render() {
         </section>
 
         <div id="checkin-modal" class="builder-modal" hidden></div>
+        <div id="pr-modal" class="builder-modal" hidden></div>
         <div id="progress-toast" class="toast" hidden></div>
       </div>
     </main>
@@ -152,6 +211,25 @@ function timelineMarkup() {
   `).join("");
 }
 
+
+function prMarkup() {
+  const best = latestPRsByExercise(prs);
+  if (!best.length) {
+    return `<article class="empty-pr card"><strong>No PR</strong><p>Add a strength record.</p></article>`;
+  }
+
+  return best.slice(0, 6).map((pr) => `
+    <article class="pr-card card">
+      <div>
+        <span>${esc(pr.exercise)}</span>
+        <strong>${Number(pr.weight || 0).toFixed(Number(pr.weight || 0) % 1 ? 1 : 0)} ${esc(pr.unit || "kg")}</strong>
+        <small>${formatDate(pr.date)}</small>
+      </div>
+      <button data-delete-pr="${pr.id}">×</button>
+    </article>
+  `).join("");
+}
+
 function bind() {
   document.querySelector("#progress-back").addEventListener("click", () => {
     navigate(`/member-detail-${member.code}`);
@@ -165,6 +243,33 @@ function bind() {
   document.querySelector("#open-photos").addEventListener("click", () => {
     navigate(`/progress-photos-${member.code}`);
   });
+
+  document.querySelector("#before-after-open").addEventListener("click", () => {
+    navigate(`/progress-photos-${member.code}`);
+  });
+
+  document.querySelectorAll("[data-chart]").forEach((button) => {
+    button.addEventListener("click", () => {
+      activeChart = button.dataset.chart;
+      render();
+    });
+  });
+
+  document.querySelector("#add-pr").addEventListener("click", openPREditor);
+
+  document.querySelectorAll("[data-delete-pr]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const pr = prs.find((item) => item.id === button.dataset.deletePr);
+      if (!window.confirm(`Delete ${pr.exercise} PR?`)) return;
+      await removePR(member.code, pr.id);
+      prs = prs.filter((item) => item.id !== pr.id);
+      render();
+      toast("Deleted");
+    });
+  });
+
+  drawProgressChart();
+
 
   document.querySelector("#empty-add")?.addEventListener("click", () => {
     editing = createBlankCheckin(member.code);
@@ -269,6 +374,94 @@ function openEditor(checkin) {
     else checkins.push(saved);
 
     checkins.sort((a, b) => new Date(b.date) - new Date(a.date));
+    modal.hidden = true;
+    render();
+    toast("Saved");
+  });
+}
+
+
+function drawProgressChart() {
+  const canvas = document.querySelector("#progress-line-chart");
+  if (!canvas) return;
+
+  const labels = {
+    weight: "Weight",
+    bodyFat: "Body Fat",
+    waist: "Waist"
+  };
+
+  const points = [...checkins]
+    .reverse()
+    .filter((item) => item[activeChart] !== "" && Number.isFinite(Number(item[activeChart])))
+    .map((item) => ({
+      label: new Intl.DateTimeFormat("en-GB", { month: "short", day: "2-digit" })
+        .format(new Date(`${item.date}T00:00:00`)),
+      value: Number(item[activeChart])
+    }));
+
+  drawLineChart(canvas, points, { label: labels[activeChart] });
+}
+
+function openPREditor() {
+  const modal = document.querySelector("#pr-modal");
+  modal.hidden = false;
+  modal.innerHTML = `
+    <div class="builder-modal-card pr-form-card">
+      <div class="builder-modal-head">
+        <div>
+          <p class="section-label">NEW PR</p>
+          <h2>Personal Record</h2>
+        </div>
+        <button id="pr-close">×</button>
+      </div>
+
+      <form id="pr-form">
+        <label class="checkin-field">
+          <span>Exercise</span>
+          <input name="exercise" required placeholder="Bench Press">
+        </label>
+
+        <div class="checkin-form-grid">
+          <label class="checkin-field">
+            <span>Weight</span>
+            <div class="metric-input">
+              <input name="weight" type="number" min="0" step="0.1" required>
+              <small>kg</small>
+            </div>
+          </label>
+
+          <label class="checkin-field">
+            <span>Reps</span>
+            <div class="metric-input">
+              <input name="reps" type="number" min="1" step="1" value="1">
+              <small>reps</small>
+            </div>
+          </label>
+        </div>
+
+        <label class="checkin-field">
+          <span>Date</span>
+          <input name="date" type="date" required value="${new Date().toISOString().slice(0,10)}">
+        </label>
+
+        <button class="button button-primary" type="submit">Save</button>
+      </form>
+    </div>
+  `;
+
+  document.querySelector("#pr-close").addEventListener("click", () => modal.hidden = true);
+  document.querySelector("#pr-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const saved = await savePR(member.code, {
+      exercise: String(data.get("exercise")).trim(),
+      weight: Number(data.get("weight")),
+      reps: Number(data.get("reps")),
+      unit: "kg",
+      date: String(data.get("date"))
+    });
+    prs.push(saved);
     modal.hidden = true;
     render();
     toast("Saved");
