@@ -3,7 +3,6 @@ import { registerRoute, startRouter } from "./router.js";
 import {
   renderLanding,
   renderTrainerLogin,
-  renderMemberDashboard,
   renderNotFound
 } from "./views.js";
 import {
@@ -20,10 +19,15 @@ import { renderProgressPage } from "./progress-page.js";
 import { renderTrainerDashboardPage } from "./trainer-dashboard-page.js";
 import { renderTrainerSettingsPage } from "./trainer-settings-page.js";
 import { renderWeeklyCheckinPage } from "./weekly-checkin-page.js";
+import { renderMemberTodayPage } from "./member-today-page.js";
+import { renderMemberProfilePage } from "./member-profile-page.js";
+import { renderBetaControlPage } from "./beta-control-page.js";
 
 registerRoute("/", renderLanding);
 registerRoute("/trainer-login", renderTrainerLogin);
-registerRoute("/member", renderMemberDashboard);
+registerRoute("/member", renderMemberTodayPage);
+registerRoute("/member-profile", renderMemberProfilePage);
+registerRoute("/beta-control", renderBetaControlPage);
 registerRoute("/workout", renderWorkoutOverview);
 registerRoute("/workout-complete", renderWorkoutComplete);
 registerRoute("/trainer", renderTrainerDashboard);

@@ -52,6 +52,7 @@ export function renderTrainerSettingsPage() {
           </label>
 
           <button class="button button-primary" type="submit">Save Profile</button>
+          <button id="open-beta-control" class="button button-secondary" type="button">Beta Control & Data Backup</button>
         </form>
 
         <div id="settings-toast" class="toast" hidden></div>
@@ -60,6 +61,8 @@ export function renderTrainerSettingsPage() {
   `;
 
   document.querySelector("#settings-back").addEventListener("click", () => navigate("/trainer-dashboard"));
+
+  document.querySelector("#open-beta-control").addEventListener("click", () => navigate("/beta-control"));
 
   document.querySelector("#trainer-profile-form").addEventListener("submit", (event) => {
     event.preventDefault();

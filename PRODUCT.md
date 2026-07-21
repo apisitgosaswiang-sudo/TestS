@@ -188,3 +188,17 @@ CLOB คือแพลตฟอร์มที่เชื่อม Trainer แ
 - Calories and macros adjustment
 - Training adjustment
 - Review status and timeline
+
+
+## Pack 10 — Beta Trial Freeze
+
+- Member Today experience
+- Daily tasks
+- Water, steps, sleep and cardio tracking
+- Versioned Pack10 data path
+- Member profile and beta data policy
+- Trainer Beta Control
+- Firebase member backup
+- JSON export
+- Audit log
+- Feature freeze and rollback documentation

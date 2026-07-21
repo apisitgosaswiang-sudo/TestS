@@ -489,3 +489,103 @@ export async function getCoachReviews(memberCode) {
     return null;
   }
 }
+
+
+// Pack10 data-safety APIs.
+// These functions only add data under new paths. They never migrate, rename,
+// or delete the legacy member/workout/progress/program data structures.
+
+export async function getMemberExperienceDay(memberCode, dateKey) {
+  if (!firebaseReady || !database || !dbApi) return null;
+  try {
+    const snapshot = await dbApi.get(
+      dbApi.ref(database, `clob/v1/memberExperience/${memberCode}/daily/${dateKey}`)
+    );
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (error) {
+    console.warn("Could not load member experience day:", error);
+    return null;
+  }
+}
+
+export async function saveMemberExperienceDay(memberCode, dateKey, payload) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.update(
+      dbApi.ref(database, `clob/v1/memberExperience/${memberCode}/daily/${dateKey}`),
+      payload
+    );
+    return true;
+  } catch (error) {
+    console.warn("Could not save member experience day:", error);
+    return false;
+  }
+}
+
+export async function getMemberDataBundle(memberCode) {
+  if (!firebaseReady || !database || !dbApi) return null;
+
+  const paths = {
+    member: `clob/members/${memberCode}`,
+    workoutSessions: `clob/workoutSessions/${memberCode}`,
+    memberProgram: `clob/memberPrograms/${memberCode}`,
+    progress: `clob/progress/${memberCode}`,
+    onlineCoaching: `clob/onlineCoaching/${memberCode}`,
+    memberExperience: `clob/v1/memberExperience/${memberCode}`
+  };
+
+  try {
+    const entries = await Promise.all(
+      Object.entries(paths).map(async ([key, path]) => {
+        const snapshot = await dbApi.get(dbApi.ref(database, path));
+        return [key, snapshot.exists() ? snapshot.val() : null];
+      })
+    );
+
+    return Object.fromEntries(entries);
+  } catch (error) {
+    console.warn("Could not create member data bundle:", error);
+    return null;
+  }
+}
+
+export async function createMemberBackup(memberCode, bundle, metadata = {}) {
+  if (!firebaseReady || !database || !dbApi || !bundle) return false;
+
+  const backupId = `${Date.now()}`;
+  try {
+    await dbApi.set(
+      dbApi.ref(database, `clob/systemBackups/members/${memberCode}/${backupId}`),
+      {
+        schemaVersion: "1.0",
+        createdAt: Date.now(),
+        createdByUid: authUser?.uid || null,
+        metadata,
+        data: bundle
+      }
+    );
+    return backupId;
+  } catch (error) {
+    console.warn("Could not create member backup:", error);
+    return false;
+  }
+}
+
+export async function appendAuditLog(payload) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.push(
+      dbApi.ref(database, "clob/system/auditLog"),
+      {
+        ...payload,
+        uid: authUser?.uid || null,
+        timestamp: Date.now(),
+        appVersion: "Beta 1.0"
+      }
+    );
+    return true;
+  } catch (error) {
+    console.warn("Could not append audit log:", error);
+    return false;
+  }
+}
