@@ -99,7 +99,7 @@ function packageBadge(customer){
   return `<span class="package-badge ${p.className}">${p.status==="expired"?"⛔":p.status==="soon"?"⏳":p.status==="active"?"●":"—"} ${esc(p.label)}</span>`;
 }
 
-const emptyData=()=>({customers:[],programs:{},logs:{},catalog:{categories:[]},bodyStats:{},programTemplates:[]});
+const emptyData=()=>({customers:[],programs:{},logs:{},catalog:{categories:[]},bodyStats:{}});
 let saveTimer=null,ready=false;
 let S={data:null,role:null,screen:"customers",dashboardMode:true,customerId:null,activeDayId:null,customerTab:"today",programTab:"overview",entries:{},showAdd:false,lastCode:null};
 
@@ -117,17 +117,6 @@ function normalize(raw){
   d.programs=d.programs&&typeof d.programs==="object"?d.programs:{};
   d.logs=d.logs&&typeof d.logs==="object"?d.logs:{};
   d.bodyStats=d.bodyStats&&typeof d.bodyStats==="object"?d.bodyStats:{};
-  d.programTemplates=asArray(d.programTemplates).map((t,i)=>({
-    ...t,id:String(t?.id??uid()),name:String(t?.name??`โปรแกรม ${i+1}`),
-    description:String(t?.description??""),category:String(t?.category??"General"),
-    exercises:asArray(t?.exercises).map(ex=>({
-      ...ex,id:String(ex?.id??uid()),name:String(ex?.name??""),
-      catalogId:ex?.catalogId==null?null:String(ex.catalogId),
-      sets:String(ex?.sets??"3"),reps:String(ex?.reps??"10"),
-      weight:String(ex?.weight??""),restMinutes:String(ex?.restMinutes??""),
-      notes:String(ex?.notes??"")
-    }))
-  }));
 
   const catalogSource=d.catalog&&typeof d.catalog==="object"?d.catalog:{};
   d.catalog={categories:asArray(catalogSource.categories).map(cat=>({
@@ -266,7 +255,7 @@ function render(){
     if(!S.role)return renderLogin();
     if(S.role==="trainer"){
       if(S.screen==="catalog")return renderCatalog();
-      if(S.screen==="templates")return renderTemplates();
+      if(S.screen==="templates")return renderTemplatesPlaceholder();
       if(S.screen==="program")return renderProgram();
       if(S.dashboardMode)return renderTrainerDashboard();
       return renderCustomers();
@@ -289,10 +278,10 @@ function render(){
   }
 }
 function nav(active){
-  return `<div class="nav">
+  return `<div class="nav trainer-main-nav">
     <button data-nav="dashboard" class="${active==="dashboard"?"active":""}">Dashboard</button>
     <button data-nav="customers" class="${active==="customers"?"active":""}">ลูกเทรน</button>
-    <button data-nav="templates" class="${active==="templates"?"active":""}">Program Sets</button>
+    <button data-nav="templates" class="${active==="templates"?"active":""}">Program Templates</button>
     <button data-nav="catalog" class="${active==="catalog"?"active":""}">Exercise Library</button>
   </div>`;
 }
@@ -462,7 +451,7 @@ function renderTrainerDashboard(){
         <b>จัดการลูกเทรน</b>
         <span>โปรไฟล์ โปรแกรม และผลการฝึก</span>
       </button>
-      <button class="quick-action" id="quickTemplates"><span class="emoji">📋</span><b>ชุดโปรแกรม</b><span>สร้างและเซฟโปรแกรมใช้ซ้ำ</span></button><button class="quick-action" id="quickLibrary">
+      <button class="quick-action" id="quickLibrary">
         <span class="emoji">🏋️</span>
         <b>คลังท่าออกกำลังกาย</b>
         <span>เพิ่มท่าและวิดีโอประกอบ</span>
@@ -487,7 +476,6 @@ function renderTrainerDashboard(){
   $("#dashAddCustomer").onclick=()=>{S.screen="customers";S.dashboardMode=false;S.showAdd=true;renderFromTop()};
   $("#dashOpenLibrary").onclick=()=>{S.screen="catalog";renderFromTop()};
   $("#quickCustomers").onclick=goCustomers;
-  if($("#quickTemplates"))$("#quickTemplates").onclick=()=>{S.screen="templates";S.dashboardMode=false;renderFromTop()};
   $("#quickLibrary").onclick=()=>{S.screen="catalog";renderFromTop()};
   $("#viewAllCustomers").onclick=goCustomers;
   if($("#viewPackageAlerts"))$("#viewPackageAlerts").onclick=goCustomers;
@@ -564,68 +552,32 @@ function renderCustomers(){
   };
 }
 
-
-function cloneTemplateExercise(ex){
-  return {id:uid(),name:String(ex?.name??""),catalogId:ex?.catalogId==null?null:String(ex.catalogId),
-    sets:String(ex?.sets??"3"),reps:String(ex?.reps??"10"),weight:String(ex?.weight??""),
-    restMinutes:String(ex?.restMinutes??""),notes:String(ex?.notes??"")};
-}
-function renderTemplates(){
-  const templates=asArray(S.data.programTemplates);
-  if(S.templateMode==="edit"){
-    const current=templates.find(t=>String(t.id)===String(S.templateId));
-    const template=current||S._newTemplateDraft||{id:null,name:"",description:"",category:"General",exercises:[]};
-    $("#app").innerHTML=`
-      ${nav("templates")}
-      <button class="btn btn-ghost" id="backTemplates">‹ Program Sets</button>
-      <h1>${template.id?"แก้ไขชุดโปรแกรม":"สร้างชุดโปรแกรมใหม่"}</h1>
-      <p class="muted">เซฟไว้ใช้ซ้ำกับลูกเทรนหลายคนได้</p>
-      <div class="card">
-        <div class="grid2">
-          <label class="field-label">ชื่อชุดโปรแกรม<input class="input" id="templateName" value="${esc(template.name)}" placeholder="เช่น Full Body Beginner"></label>
-          <label class="field-label">ประเภท<select class="input" id="templateCategory">${["General","Strength","Hypertrophy","Fat Loss","Mobility","Beginner","Advanced"].map(x=>`<option ${template.category===x?"selected":""}>${x}</option>`).join("")}</select></label>
-        </div>
-        <label class="field-label" style="margin-top:10px">รายละเอียด<textarea class="input" id="templateDescription" rows="2">${esc(template.description)}</textarea></label>
-      </div>
-      <div class="section-heading"><h3>ท่าออกกำลังกาย</h3><span class="small">${asArray(template.exercises).length} ท่า</span></div>
-      ${asArray(template.exercises).map((ex,i)=>{const ce=ex.catalogId?findCatalog(ex.catalogId):null;return `<div class="exercise">
-        <div class="row-between"><b>${i+1}. ${esc(ce?.name||ex.name||"(ไม่มีชื่อท่า)")}</b><button class="btn-danger" data-remove-template-ex="${ex.id}">×</button></div>
-        <div class="grid3" style="margin-top:8px">
-          <input class="input" placeholder="เซ็ท" value="${esc(ex.sets)}" data-template-field="sets|${ex.id}">
-          <input class="input" placeholder="ครั้ง" value="${esc(ex.reps)}" data-template-field="reps|${ex.id}">
-          <input class="input" placeholder="น้ำหนัก kg" value="${esc(ex.weight)}" data-template-field="weight|${ex.id}">
-        </div>
-        <div class="grid2" style="margin-top:8px">
-          <input class="input" placeholder="พัก (นาที)" value="${esc(ex.restMinutes)}" data-template-field="restMinutes|${ex.id}">
-          <input class="input" placeholder="หมายเหตุ" value="${esc(ex.notes)}" data-template-field="notes|${ex.id}">
-        </div>
-      </div>`}).join("")||`<div class="empty-state"><span class="emoji">🏋️</span>ยังไม่มีท่า</div>`}
-      <div class="card">
-        <div class="row">
-          <select class="input" id="templateExerciseSelect"><option value="">เลือกท่า</option>${catalogOptions()}<option value="__custom__">ท่ากำหนดเอง</option></select>
-          <button class="btn btn-primary" id="addTemplateExercise">เพิ่ม</button>
-        </div>
-      </div>
-      <div class="sticky-save-bar"><button class="btn" id="cancelTemplate">ยกเลิก</button><button class="btn btn-primary" id="saveTemplate">บันทึกชุดโปรแกรม</button></div>`;
-    bindNav();
-    const draft={...template,exercises:asArray(template.exercises).map(ex=>({...ex}))};
-    const persistDraft=()=>{ if(template.id){const idx=S.data.programTemplates.findIndex(t=>String(t.id)===String(template.id));S.data.programTemplates[idx]={...draft,id:String(template.id)};}else S._newTemplateDraft=draft; };
-    $("#backTemplates").onclick=$("#cancelTemplate").onclick=()=>{S.templateMode="list";S.templateId=null;renderFromTop()};
-    $$("[data-template-field]").forEach(i=>i.oninput=()=>{const [f,id]=i.dataset.templateField.split("|");const ex=draft.exercises.find(x=>String(x.id)===String(id));if(ex)ex[f]=i.value;});
-    $$("[data-remove-template-ex]").forEach(b=>b.onclick=()=>{draft.exercises=draft.exercises.filter(x=>String(x.id)!==String(b.dataset.removeTemplateEx));persistDraft();render()});
-    $("#addTemplateExercise").onclick=()=>{const v=$("#templateExerciseSelect").value;if(!v)return;const ce=v==="__custom__"?null:findCatalog(v);draft.exercises.push({id:uid(),name:ce?.name||"ท่ากำหนดเอง",catalogId:ce?String(v):null,sets:"3",reps:"10",weight:"",restMinutes:"",notes:""});persistDraft();render()};
-    $("#saveTemplate").onclick=()=>{const name=$("#templateName").value.trim();if(!name)return alert("กรุณากรอกชื่อชุดโปรแกรม");draft.name=name;draft.category=$("#templateCategory").value;draft.description=$("#templateDescription").value.trim();if(template.id){const idx=S.data.programTemplates.findIndex(t=>String(t.id)===String(template.id));S.data.programTemplates[idx]={...draft,id:String(template.id)}}else{S.data.programTemplates.push({...draft,id:uid()});delete S._newTemplateDraft}save();S.templateMode="list";S.templateId=null;renderFromTop()};
-    return;
-  }
+function renderTemplatesPlaceholder(){
   $("#app").innerHTML=`
     ${nav("templates")}
-    <section class="hero-dashboard"><div class="hero-eyebrow">📚 WORKOUT PROGRAM LIBRARY</div><h1 class="hero-title">ชุดโปรแกรมออกกำลังกาย</h1><p class="hero-subtitle">สร้างโปรแกรมมาตรฐานไว้ แล้วนำไปกำหนดให้ลูกเทรนได้ทันที</p><div class="hero-actions"><button class="btn btn-primary" id="createTemplate">＋ สร้างชุดโปรแกรม</button></div></section>
-    <div class="template-list">${templates.length?templates.map(t=>`<div class="template-card"><div class="row-between"><div><span class="template-category">${esc(t.category)}</span><h3>${esc(t.name)}</h3><p class="small">${esc(t.description||"ไม่มีรายละเอียด")}</p></div><span class="template-count">${asArray(t.exercises).length}<small>ท่า</small></span></div><div class="template-actions"><button class="btn" data-edit-template="${t.id}">แก้ไข</button><button class="btn" data-copy-template="${t.id}">คัดลอก</button><button class="btn-danger" data-delete-template="${t.id}">ลบ</button></div></div>`).join(""):`<div class="empty-state"><span class="emoji">📋</span>ยังไม่มีชุดโปรแกรม</div>`}</div>`;
+    <section class="hero-dashboard template-placeholder-hero">
+      <div class="hero-eyebrow">📋 PROGRAM TEMPLATES</div>
+      <h1 class="hero-title">ชุดโปรแกรมออกกำลังกาย</h1>
+      <p class="hero-subtitle">
+        หน้านี้พร้อมสำหรับเพิ่มระบบสร้างและบันทึกชุดโปรแกรมในเวอร์ชันถัดไป
+      </p>
+    </section>
+
+    <div class="card template-placeholder-card">
+      <div class="template-placeholder-icon">🧩</div>
+      <h3>Routing ทำงานแล้ว</h3>
+      <p class="small">
+        เวอร์ชันนี้เพิ่มเฉพาะเมนูและหน้าทดสอบ โดยยังไม่แก้โครงสร้างข้อมูลหรือ Firebase
+      </p>
+      <div class="template-checklist">
+        <span>✓ Dashboard เดิมไม่ถูกแก้</span>
+        <span>✓ ลูกเทรนและ Membership เดิมยังอยู่</span>
+        <span>✓ Exercise Library เดิมยังอยู่</span>
+      </div>
+    </div>`;
+
   bindNav();
-  $("#createTemplate").onclick=()=>{S.templateMode="edit";S.templateId=null;S._newTemplateDraft={id:null,name:"",description:"",category:"General",exercises:[]};renderFromTop()};
-  $$("[data-edit-template]").forEach(b=>b.onclick=()=>{S.templateMode="edit";S.templateId=b.dataset.editTemplate;renderFromTop()});
-  $$("[data-copy-template]").forEach(b=>b.onclick=()=>{const t=templates.find(x=>String(x.id)===String(b.dataset.copyTemplate));S.data.programTemplates.push({...t,id:uid(),name:`${t.name} (Copy)`,exercises:asArray(t.exercises).map(cloneTemplateExercise)});save();renderFromTop()});
-  $$("[data-delete-template]").forEach(b=>b.onclick=()=>{const t=templates.find(x=>String(x.id)===String(b.dataset.deleteTemplate));if(confirm(`ลบชุดโปรแกรม "${t.name}" ใช่หรือไม่?`)){S.data.programTemplates=S.data.programTemplates.filter(x=>String(x.id)!==String(t.id));save();renderFromTop()}});
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function renderCatalog(){
@@ -754,14 +706,13 @@ function renderProgram(){
       <button data-ptab="program" class="${S.programTab==="program"?"active":""}">Workout Plan</button>
       <button data-ptab="dashboard" class="${S.programTab==="dashboard"?"active":""}">Progress</button>
     </div>
-    ${S.programTab==="overview"?overview:S.programTab==="dashboard"?dashboard:`${programHtml}<div class="card assign-template-card"><h3>เพิ่มวันฝึก</h3><p class="small">สร้างวันเปล่า หรือเลือกชุดโปรแกรมที่เซฟไว้</p><select class="input" id="assignTemplateSelect"><option value="">เลือกชุดโปรแกรม</option>${asArray(S.data.programTemplates).map(t=>`<option value="${t.id}">${esc(t.name)} · ${asArray(t.exercises).length} ท่า</option>`).join("")}</select><div class="grid2" style="margin-top:9px"><button class="btn" id="addBlankDay">＋ วันเปล่า</button><button class="btn btn-primary" id="addDayFromTemplate">ใช้ชุดโปรแกรม</button></div></div>`}`;
+    ${S.programTab==="overview"?overview:S.programTab==="dashboard"?dashboard:`${programHtml}<button class="btn btn-primary btn-block" id="addDay">+ เพิ่มวันฝึก</button>`}`;
   $("#backCustomers").onclick=()=>{S.screen="customers";S.dashboardMode=false;renderFromTop()};
   $$("[data-ptab]").forEach(b=>b.onclick=()=>{S.programTab=b.dataset.ptab;renderFromTop()});
   if($("#openPlanFromOverview"))$("#openPlanFromOverview").onclick=()=>{S.programTab="program";renderFromTop()};
   if($("#openProgressFromOverview"))$("#openProgressFromOverview").onclick=()=>{S.programTab="dashboard";renderFromTop()};
   if($("#openProgressQuick"))$("#openProgressQuick").onclick=()=>{S.programTab="dashboard";renderFromTop()};
-  if($("#addBlankDay"))$("#addBlankDay").onclick=()=>{p.days.push({id:uid(),name:`วันที่ ${p.days.length+1}`,exercises:[]});save();renderFromTop()};
-  if($("#addDayFromTemplate"))$("#addDayFromTemplate").onclick=()=>{const id=$("#assignTemplateSelect").value;if(!id)return alert("กรุณาเลือกชุดโปรแกรม");const t=asArray(S.data.programTemplates).find(x=>String(x.id)===String(id));if(!t)return;p.days.push({id:uid(),name:t.name,templateId:String(t.id),exercises:asArray(t.exercises).map(cloneTemplateExercise)});save();showToast(`เพิ่ม ${t.name} แล้ว`);renderFromTop()};
+  if($("#addDay"))$("#addDay").onclick=()=>{p.days.push({id:uid(),name:`วันที่ ${p.days.length+1}`,exercises:[]});save();render()};
   $$("[data-day-name]").forEach(i=>i.oninput=()=>{p.days.find(d=>String(d.id)===String(i.dataset.dayName)).name=i.value;save()});
   $$("[data-remove-day]").forEach(b=>b.onclick=()=>{p.days=p.days.filter(d=>d.id!==b.dataset.removeDay);save();render()});
   $$("[data-add-program-ex]").forEach(b=>b.onclick=()=>{const day=p.days.find(d=>String(d.id)===String(b.dataset.addProgramEx)),sel=$(`[data-select-day="${day.id}"]`),v=sel.value;if(!v)return;const ce=v==="__custom__"?null:findCatalog(v);day.exercises.push({id:uid(),name:ce?.name||"",catalogId:ce?v:null,sets:"3",reps:"10",weight:"",restMinutes:"",notes:""});save();render()});

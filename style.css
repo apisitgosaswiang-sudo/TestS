@@ -686,13 +686,50 @@ body::after{
 }
 
 
-.template-list{display:flex;flex-direction:column;gap:10px}
-.template-card{padding:16px;border:1px solid var(--border);border-radius:17px;background:linear-gradient(145deg,var(--surface2),#121220)}
-.template-card h3{margin:6px 0 4px;font-size:17px}
-.template-category{display:inline-flex;padding:4px 8px;border-radius:999px;color:var(--mint);background:var(--mint-soft);font-size:9px;font-weight:700}
-.template-count{width:48px;height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px;background:var(--accent-soft);color:var(--accent2);font-size:22px;font-weight:800}
-.template-count small{font-size:8px;color:var(--muted)}
-.template-actions{display:flex;gap:7px;border-top:1px solid var(--border);padding-top:11px;margin-top:12px}
-.sticky-save-bar{position:fixed;left:50%;bottom:0;z-index:30;width:min(760px,100%);transform:translateX(-50%);display:grid;grid-template-columns:1fr 2fr;gap:8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(15,15,27,.96);border-top:1px solid var(--border);backdrop-filter:blur(18px)}
-.assign-template-card{margin-top:13px;border-color:rgba(69,210,199,.25)}
-@media(max-width:560px){.nav{overflow-x:auto;scrollbar-width:none}.nav button{min-width:105px;flex:0 0 auto}}
+/* V2.3.1 — Program Templates routing test */
+.trainer-main-nav{
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.trainer-main-nav::-webkit-scrollbar{display:none}
+.trainer-main-nav button{
+  min-width:112px;
+  flex:0 0 auto;
+}
+.template-placeholder-hero{
+  background:
+    radial-gradient(circle at 96% 2%,rgba(69,210,199,.14),transparent 34%),
+    linear-gradient(145deg,#1C1C2D,#121220);
+}
+.template-placeholder-card{
+  text-align:center;
+  padding:26px 18px;
+}
+.template-placeholder-icon{
+  width:58px;
+  height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 12px;
+  border-radius:18px;
+  font-size:27px;
+  background:var(--mint-soft);
+  border:1px solid rgba(69,210,199,.24);
+}
+.template-checklist{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:16px;
+  text-align:left;
+}
+.template-checklist span{
+  padding:10px 11px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:#11111E;
+  color:var(--muted);
+  font-size:11px;
+}
+
