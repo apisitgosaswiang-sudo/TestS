@@ -18,6 +18,12 @@
           ".read": "auth != null",
           ".write": "auth != null"
         }
+      },
+      "onlineCoaching": {
+        "$memberCode": {
+          ".read": "auth != null",
+          ".write": "auth != null"
+        }
       }
     }
   }

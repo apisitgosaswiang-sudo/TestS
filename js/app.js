@@ -19,6 +19,7 @@ import { renderProgressPhotosPage } from "./progress-photos-page.js";
 import { renderProgressPage } from "./progress-page.js";
 import { renderTrainerDashboardPage } from "./trainer-dashboard-page.js";
 import { renderTrainerSettingsPage } from "./trainer-settings-page.js";
+import { renderWeeklyCheckinPage } from "./weekly-checkin-page.js";
 
 registerRoute("/", renderLanding);
 registerRoute("/trainer-login", renderTrainerLogin);
@@ -46,6 +47,12 @@ registerRoute("/404", () => {
 
   if (path === "/trainer-settings") {
     renderTrainerSettingsPage();
+    return;
+  }
+
+  const weeklyCheckinMatch = path.match(/^\/weekly-checkins-(\d{5})$/);
+  if (weeklyCheckinMatch) {
+    renderWeeklyCheckinPage(weeklyCheckinMatch[1]);
     return;
   }
 

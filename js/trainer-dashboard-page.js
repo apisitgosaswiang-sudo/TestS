@@ -54,7 +54,7 @@ function render() {
 
         <section class="dashboard-summary-grid">
           ${summaryCard("Check-ins Due", summary.dueToday, "Today")}
-          ${summaryCard("Waiting Review", summary.waitingForReview, "Submitted")}
+          ${summaryCard("Waiting Review", summary.waitingForReview, "Submitted", "waiting-review-card")}
           ${summaryCard("Overdue", summary.overdue, "Needs action")}
           ${summaryCard("Active Clients", summary.activeClients, "Online coaching")}
         </section>
@@ -92,9 +92,9 @@ function render() {
   bind();
 }
 
-function summaryCard(label, value, sublabel) {
+function summaryCard(label, value, sublabel, id = "") {
   return `
-    <article class="dashboard-summary-card card">
+    <article class="dashboard-summary-card card" ${id ? `id="${id}"` : ""}>
       <span>${escapeHtml(label)}</span>
       <strong>${escapeHtml(value)}</strong>
       <small>${escapeHtml(sublabel)}</small>
@@ -168,6 +168,11 @@ function notificationMarkup() {
 function bind() {
   document.querySelector("#trainer-profile-button").addEventListener("click", () => {
     navigate("/trainer-settings");
+  });
+
+  document.querySelector("#waiting-review-card")?.addEventListener("click", () => {
+    const firstMember = members[0];
+    if (firstMember) navigate(`/weekly-checkins-${firstMember.code}`);
   });
 
   document.querySelector("#view-members").addEventListener("click", () => {

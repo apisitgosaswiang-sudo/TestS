@@ -174,3 +174,17 @@ CLOB คือแพลตฟอร์มที่เชื่อม Trainer แ
 - Notification center
 - Mark all notifications read
 - Member navigation
+
+
+## Pack 09 Part 2 Completed
+
+- Weekly check-in form
+- Sleep, stress, energy and hunger
+- Workout and nutrition adherence
+- Steps and cardio
+- Weekly wins and challenges
+- Question for coach
+- Coach feedback and next-week goal
+- Calories and macros adjustment
+- Training adjustment
+- Review status and timeline

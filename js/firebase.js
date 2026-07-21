@@ -413,3 +413,79 @@ export async function deleteMemberPR(memberCode, prId) {
     return false;
   }
 }
+
+
+export async function getWeeklyCheckins(memberCode) {
+  if (!firebaseReady || !database || !dbApi) return null;
+  try {
+    const snapshot = await dbApi.get(
+      dbApi.ref(database, `clob/onlineCoaching/${memberCode}/weeklyCheckins`)
+    );
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (error) {
+    console.warn("Could not load weekly check-ins:", error);
+    return null;
+  }
+}
+
+export async function saveWeeklyCheckin(memberCode, checkinId, payload) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(
+      dbApi.ref(database, `clob/onlineCoaching/${memberCode}/weeklyCheckins/${checkinId}`),
+      payload
+    );
+    return true;
+  } catch (error) {
+    console.warn("Could not save weekly check-in:", error);
+    return false;
+  }
+}
+
+export async function deleteWeeklyCheckin(memberCode, checkinId) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(
+      dbApi.ref(database, `clob/onlineCoaching/${memberCode}/weeklyCheckins/${checkinId}`),
+      null
+    );
+    return true;
+  } catch (error) {
+    console.warn("Could not delete weekly check-in:", error);
+    return false;
+  }
+}
+
+export async function saveCoachReview(memberCode, checkinId, payload) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(
+      dbApi.ref(database, `clob/onlineCoaching/${memberCode}/reviews/${checkinId}`),
+      payload
+    );
+    await dbApi.update(
+      dbApi.ref(database, `clob/onlineCoaching/${memberCode}/weeklyCheckins/${checkinId}`),
+      {
+        reviewStatus: payload.status || "reviewed",
+        reviewedAt: payload.reviewedAt || Date.now()
+      }
+    );
+    return true;
+  } catch (error) {
+    console.warn("Could not save coach review:", error);
+    return false;
+  }
+}
+
+export async function getCoachReviews(memberCode) {
+  if (!firebaseReady || !database || !dbApi) return null;
+  try {
+    const snapshot = await dbApi.get(
+      dbApi.ref(database, `clob/onlineCoaching/${memberCode}/reviews`)
+    );
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (error) {
+    console.warn("Could not load coach reviews:", error);
+    return null;
+  }
+}

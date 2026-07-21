@@ -3393,3 +3393,393 @@
   outline: none;
   background: #FAFAFA;
 }
+
+
+.weekly-checkin-screen {
+  min-height: 100dvh;
+  padding: max(22px, env(safe-area-inset-top)) 18px calc(46px + env(safe-area-inset-bottom));
+}
+
+.weekly-header {
+  display: grid;
+  grid-template-columns: 42px 1fr 46px;
+  align-items: center;
+  gap: 10px;
+}
+
+.weekly-header h1 {
+  margin: 0;
+  font-size: 1.55rem;
+  letter-spacing: -.04em;
+}
+
+.weekly-add {
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 15px;
+  color: white;
+  background: #09090B;
+  font-size: 1.25rem;
+}
+
+.weekly-member {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px;
+}
+
+.weekly-member-avatar {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  color: white;
+  background: #18181B;
+  font-weight: 850;
+}
+
+.weekly-member-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.weekly-member strong,
+.weekly-member span {
+  display: block;
+}
+
+.weekly-member span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .64rem;
+}
+
+.weekly-member button {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: white;
+  font-size: .63rem;
+  font-weight: 750;
+}
+
+.weekly-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.weekly-summary-card {
+  padding: 14px 12px;
+}
+
+.weekly-summary-card span,
+.weekly-summary-card strong {
+  display: block;
+}
+
+.weekly-summary-card span {
+  color: var(--muted);
+  font-size: .57rem;
+  font-weight: 750;
+}
+
+.weekly-summary-card strong {
+  margin-top: 7px;
+  font-size: 1.2rem;
+}
+
+.weekly-section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.weekly-section-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.weekly-section-head > span {
+  display: grid;
+  min-width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--muted);
+  background: #F4F4F5;
+  font-size: .62rem;
+  font-weight: 800;
+}
+
+.weekly-list {
+  display: grid;
+  gap: 11px;
+  margin-top: 12px;
+}
+
+.weekly-card {
+  overflow: hidden;
+}
+
+.weekly-card-main {
+  width: 100%;
+  padding: 15px;
+  border: 0;
+  background: white;
+  text-align: left;
+}
+
+.weekly-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.weekly-card-top strong,
+.weekly-card-top span {
+  display: block;
+}
+
+.weekly-card-top strong {
+  font-size: .75rem;
+}
+
+.weekly-card-top > div > span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .59rem;
+}
+
+.review-badge {
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: .53rem;
+  font-weight: 800;
+}
+
+.review-badge.is-reviewed {
+  color: #166534;
+  background: #DCFCE7;
+}
+
+.review-badge.is-pending {
+  color: #92400E;
+  background: #FEF3C7;
+}
+
+.weekly-score-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 13px;
+}
+
+.weekly-score-row div {
+  padding: 10px;
+  border-radius: 12px;
+  background: #FAFAFA;
+}
+
+.weekly-score-row span,
+.weekly-score-row strong {
+  display: block;
+}
+
+.weekly-score-row span {
+  color: var(--muted);
+  font-size: .53rem;
+}
+
+.weekly-score-row strong {
+  margin-top: 4px;
+  font-size: .68rem;
+}
+
+.weekly-wellness-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.weekly-wellness-row span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  background: #F4F4F5;
+  font-size: .54rem;
+}
+
+.review-preview {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: .62rem;
+  line-height: 1.5;
+}
+
+.weekly-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--line);
+}
+
+.weekly-card-actions button {
+  min-height: 40px;
+  border: 0;
+  background: white;
+  font-size: .62rem;
+  font-weight: 750;
+}
+
+.weekly-card-actions button + button {
+  border-left: 1px solid var(--line);
+  color: #A1A1AA;
+}
+
+.weekly-empty {
+  padding: 25px 18px;
+  text-align: center;
+}
+
+.weekly-empty p {
+  margin: 6px 0 16px;
+  color: var(--muted);
+  font-size: .67rem;
+}
+
+.weekly-form-card form,
+.review-form-card form {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.weekly-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.weekly-field > span,
+.weekly-range-field > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: .63rem;
+  font-weight: 750;
+}
+
+.weekly-field input,
+.weekly-field textarea {
+  width: 100%;
+  min-height: 43px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  outline: 0;
+  background: #FAFAFA;
+}
+
+.weekly-field textarea {
+  padding: 10px 11px;
+  resize: vertical;
+}
+
+.weekly-metric-input {
+  display: grid;
+  grid-template-columns: 1fr 48px;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #FAFAFA;
+}
+
+.weekly-metric-input input {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.weekly-metric-input small {
+  color: var(--muted);
+  font-size: .58rem;
+  text-align: center;
+}
+
+.weekly-range-field {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.weekly-range-field input {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.weekly-range-field strong {
+  font-size: .68rem;
+}
+
+.member-submission-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.member-submission-summary div {
+  padding: 11px;
+  border-radius: 12px;
+  background: #FAFAFA;
+}
+
+.member-submission-summary span,
+.member-submission-summary strong {
+  display: block;
+}
+
+.member-submission-summary span {
+  color: var(--muted);
+  font-size: .54rem;
+}
+
+.member-submission-summary strong {
+  margin-top: 4px;
+  font-size: .72rem;
+}
+
+.member-question {
+  margin-top: 12px;
+  padding: 13px;
+}
+
+.member-question span {
+  color: var(--muted);
+  font-size: .59rem;
+  font-weight: 750;
+}
+
+.member-question p {
+  margin: 6px 0 0;
+  font-size: .68rem;
+  line-height: 1.5;
+}
+
+#waiting-review-card {
+  cursor: pointer;
+}
