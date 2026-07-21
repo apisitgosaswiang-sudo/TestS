@@ -1,21 +1,26 @@
-# Workout Tracker V2.3.7 Simple Template Day Builder
+# Workout Tracker V2.4.0 — Customer Foundation Beta
 
-เพิ่ม:
-- สร้าง Template พร้อม Day 1 อัตโนมัติ
-- เพิ่มวันฝึก
-- เปลี่ยนชื่อวันฝึก
-- ลบวันฝึก
-- เลือกท่าจาก Exercise Library ผ่าน Bottom Sheet
-- กรอก Sets และ Reps แบบง่าย
-- ซ่อน Rest, RPE และหมายเหตุไว้ใน “ตั้งค่าเพิ่มเติม”
-- ลบท่าออกจากแต่ละวัน
-- รองรับ Template เดิมจาก V2.3.5 และ V2.3.6
-- บันทึกข้อมูลลง Firebase
+เวอร์ชันทดสอบแรกของระบบบริหารลูกเทรนสำหรับ Personal Trainer โดยระบบช่วยจัดการข้อมูล แต่ไม่สร้างหรือเลือกโปรแกรมแทนเทรนเนอร์
 
-ยังไม่เพิ่ม:
-- Drag & Drop เรียงท่า
-- Assign Template ให้ลูกเทรน
-- Warm-up preset
-- PDF Export
+## ฟีเจอร์หลัก
 
-ตรวจ app.js ด้วย esbuild แล้วผ่าน
+- Customer Management
+- ค้นหาลูกเทรนด้วยชื่อ รหัส เบอร์โทร หรือเป้าหมาย
+- จำนวนครั้งทั้งหมดและจำนวนครั้งคงเหลือ
+- เป้าหมายและ Coach Note
+- สถานะแพ็กเกจและวันคงเหลือ
+- รองรับข้อมูลเดิมจาก V2.3.x
+- Database schema version 2.4
+- Firebase Anonymous Authentication และ Realtime Database
+
+## โครงสร้างไฟล์
+
+- `index.html` — หน้าเว็บหลัก
+- `style.css` — รูปแบบหน้าจอ
+- `app.js` — การทำงานหลักของแอป
+- `firebase.js` — การเชื่อมต่อ Firebase
+- `config.js` — เวอร์ชันและค่าคงที่ของระบบ
+- `customers.js` — โมดูลข้อมูลลูกเทรน
+- `UPLOAD-GUIDE.md` — วิธีอัปโหลดผ่าน GitHub Web
+
+แพ็กเกจนี้ไม่มีโฟลเดอร์ย่อย เพื่อให้อัปโหลดผ่านหน้าเว็บ GitHub ได้โดยตรง.

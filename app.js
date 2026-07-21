@@ -1,4 +1,6 @@
-window.__WORKOUT_BUILD__ = "2.3.7-simple-template-day-builder";
+import { APP_VERSION, DB_VERSION, RELEASE_NAME } from "./config.js";
+import { createCustomerRecord, normalizeCustomerProfile } from "./customers.js";
+window.__WORKOUT_BUILD__ = `${APP_VERSION}-${RELEASE_NAME}`;
 import { auth, dataRef, get, set, signInAnonymously } from "./firebase.js";
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
@@ -100,7 +102,7 @@ function packageBadge(customer){
   return `<span class="package-badge ${p.className}">${p.status==="expired"?"⛔":p.status==="soon"?"⏳":p.status==="active"?"●":"—"} ${esc(p.label)}</span>`;
 }
 
-const emptyData=()=>({customers:[],programs:{},logs:{},catalog:{categories:[]},bodyStats:{},programTemplates:[]});
+const emptyData=()=>({meta:{schemaVersion:DB_VERSION,appVersion:APP_VERSION},customers:[],programs:{},logs:{},catalog:{categories:[]},bodyStats:{},programTemplates:[]});
 let saveTimer=null,ready=false;
 let S={data:null,role:null,screen:"customers",dashboardMode:true,customerId:null,activeDayId:null,customerTab:"dashboard",programTab:"overview",entries:{},showAdd:false,lastCode:null,showTemplateForm:false,editingTemplateId:null,editingTemplateDayId:null,templateExerciseSearch:"",showTemplateAdvanced:{},templatePickerOpen:false};
 
@@ -113,6 +115,7 @@ function asArray(value){
 function normalize(raw){
   const source=raw&&typeof raw==="object"?raw:{};
   const d={...emptyData(),...source};
+  d.meta={...(source.meta||{}),schemaVersion:DB_VERSION,appVersion:APP_VERSION,lastOpenedAt:new Date().toISOString()};
 
   d.customers=asArray(d.customers);
   d.programs=d.programs&&typeof d.programs==="object"?d.programs:{};
@@ -152,6 +155,7 @@ function normalize(raw){
       category:String(template?.category??"General"),
       description:String(template?.description??""),
       createdAt:String(template?.createdAt??isoToday()),
+      favorite:Boolean(template?.favorite),
       days
     };
   });
@@ -191,6 +195,7 @@ function normalize(raw){
       c.startDateISO=parsedStart?dateToISO(parsedStart):isoToday();
     }
     c.subscriptionMonths=Math.max(0,Number(c.subscriptionMonths||0));
+    Object.assign(c,normalizeCustomerProfile(c));
 
     const rawProgram=d.programs[c.id];
     const programSource=Array.isArray(rawProgram)
@@ -381,7 +386,8 @@ function customerCard(c){
           ${packageBadge(c)}
         </span>
         <span class="small" style="display:block">รหัส ${esc(c.code)} · ${days} วันฝึก · บันทึก ${logs} ครั้ง</span>
-        <span class="package-meta">${esc(packageMeta)}</span>
+        ${c.goal?`<span class="package-meta">เป้าหมาย: ${esc(c.goal)}</span>`:""}
+        <span class="package-meta">${esc(packageMeta)}${Number(c.sessionsTotal||0)>0?` · เหลือ ${Math.max(0,Number(c.sessionsRemaining||0))}/${Number(c.sessionsTotal)} ครั้ง`:""}</span>
       </span>
     </span>
     <span>›</span>
@@ -791,17 +797,38 @@ function renderTrainerDashboard(){
 }
 
 function renderCustomers(){
+  const total=S.data.customers.length;
+  const active=S.data.customers.filter(c=>packageInfo(c).status==="active").length;
+  const followup=S.data.customers.filter(c=>["soon","expired","unset"].includes(packageInfo(c).status)).length;
+  const sessions=S.data.customers.reduce((sum,c)=>sum+Math.max(0,Number(c.sessionsRemaining||0)),0);
   $("#app").innerHTML=`
     ${nav("customers")}
-    <h1>Trainer Progress</h1>
-    <p class="muted">เลือกลูกเทรนเพื่อจัดWorkout Planหรือดูผลการฝึก</p>
-    <input class="input" id="searchCustomer" placeholder="ค้นหาชื่อหรือรหัสสมาชิก..." style="margin-bottom:10px">
-    <button class="btn btn-block" id="toggleAdd">+ เพิ่มลูกเทรน</button>
+    <div class="release-banner"><span>V${esc(APP_VERSION)} BETA</span><b>Customer Management Foundation</b></div>
+    <h1>ลูกเทรนของฉัน</h1>
+    <p class="muted">จัดการข้อมูลพื้นฐาน แพ็กเกจ และเป้าหมาย โดยโปรแกรมยังคงออกแบบโดยเทรนเนอร์</p>
+    <div class="customer-kpi-grid">
+      <div class="mini-stat"><b>${total}</b><span>ลูกเทรนทั้งหมด</span></div>
+      <div class="mini-stat"><b>${active}</b><span>แพ็กเกจปกติ</span></div>
+      <div class="mini-stat"><b>${followup}</b><span>ควรติดตาม</span></div>
+      <div class="mini-stat"><b>${sessions}</b><span>ครั้งคงเหลือรวม</span></div>
+    </div>
+    <input class="input" id="searchCustomer" placeholder="ค้นหาชื่อ รหัส เบอร์โทร หรือเป้าหมาย..." style="margin-bottom:10px">
+    <button class="btn btn-primary btn-block" id="toggleAdd">${S.showAdd?"ปิดแบบฟอร์ม":"+ เพิ่มลูกเทรน"}</button>
     ${S.showAdd?`<div class="card add-customer-card">
       <h3>เพิ่มลูกเทรนใหม่</h3>
       <div class="grid2">
-        <label class="field-label">ชื่อลูกเทรน
+        <label class="field-label">ชื่อลูกเทรน *
           <input class="input" id="newCustomer" placeholder="เช่น Sun">
+        </label>
+        <label class="field-label">เบอร์โทร
+          <input class="input" id="customerPhone" inputmode="tel" placeholder="08x-xxx-xxxx">
+        </label>
+        <label class="field-label">เป้าหมายหลัก
+          <select class="input" id="customerGoal">
+            <option value="">ยังไม่ระบุ</option>
+            <option>ลดไขมัน</option><option>เพิ่มกล้ามเนื้อ</option><option>เพิ่มความแข็งแรง</option>
+            <option>สุขภาพและการเคลื่อนไหว</option><option>เตรียมแข่งขัน</option><option>ฟื้นฟูการออกกำลังกาย</option>
+          </select>
         </label>
         <label class="field-label">ระยะเวลาที่สมัคร
           <div class="month-input-wrap">
@@ -809,57 +836,63 @@ function renderCustomers(){
             <span>เดือน</span>
           </div>
         </label>
+        <label class="field-label">จำนวนครั้งในแพ็กเกจ
+          <input class="input" id="sessionsTotal" type="number" inputmode="numeric" min="0" max="999" value="12">
+        </label>
+        <label class="field-label">หมายเหตุเบื้องต้น
+          <input class="input" id="customerNote" placeholder="เช่น ระวังเข่าซ้าย">
+        </label>
       </div>
       <div class="package-preview" id="packagePreview"></div>
-      <button class="btn btn-primary btn-block" id="addCustomer">เพิ่มลูกเทรนและเริ่มนับเวลา</button>
+      <button class="btn btn-primary btn-block" id="addCustomer">เพิ่มลูกเทรนและสร้างโปรไฟล์</button>
     </div>`:""}
     ${S.lastCode?`<div class="notice">เพิ่ม <b>${esc(S.lastCode.name)}</b> แล้ว<br>รหัสสมาชิก: <b style="color:var(--accent)">${esc(S.lastCode.code)}</b> · แพ็กเกจ ${esc(S.lastCode.subscriptionMonths||"-")} เดือน</div>`:""}
     <div class="stack" id="customerList">${S.data.customers.length?S.data.customers.map(customerCard).join(""):`<p class="small">ยังไม่มีลูกเทรน</p>`}</div>`;
   bindNav();
-  const bindCards=()=>$$("[data-customer]").forEach(b=>b.onclick=()=>{S.customerId=b.dataset.customer;S.screen="program";S.programTab="overview";renderFromTop()});
+  const bindCards=()=>$$('[data-customer]').forEach(b=>b.onclick=()=>{S.customerId=b.dataset.customer;S.screen="program";S.programTab="overview";renderFromTop()});
   bindCards();
   $("#searchCustomer").oninput=e=>{
     const q=e.target.value.toLowerCase();
-    const list=S.data.customers.filter(c=>c.name.toLowerCase().includes(q)||c.code.includes(q));
+    const list=S.data.customers.filter(c=>[c.name,c.code,c.phone,c.goal].some(v=>String(v||"").toLowerCase().includes(q)));
     $("#customerList").innerHTML=list.length?list.map(customerCard).join(""):`<p class="small">ไม่พบข้อมูล</p>`;bindCards();
   };
   $("#toggleAdd").onclick=()=>{S.showAdd=!S.showAdd;render()};
   const updatePackagePreview=()=>{
     if(!$("#subscriptionMonths")||!$("#packagePreview"))return;
     const months=Math.max(1,Number($("#subscriptionMonths").value||1));
+    const count=Math.max(0,Number($("#sessionsTotal")?.value||0));
     const start=new Date();
     const end=addMonthsSafe(start,months);
-    $("#packagePreview").innerHTML=`<span>📅 เริ่ม ${formatThaiDate(start)}</span><span>🏁 สิ้นสุด ${formatThaiDate(end)}</span><span>⏱ ${months} เดือน</span>`;
+    $("#packagePreview").innerHTML=`<span>📅 เริ่ม ${formatThaiDate(start)}</span><span>🏁 สิ้นสุด ${formatThaiDate(end)}</span><span>🎟 ${count||"ไม่จำกัด"} ครั้ง</span>`;
   };
   if($("#subscriptionMonths")){
     $("#subscriptionMonths").oninput=updatePackagePreview;
+    $("#sessionsTotal").oninput=updatePackagePreview;
     updatePackagePreview();
   }
   if($("#addCustomer"))$("#addCustomer").onclick=()=>{
     const name=$("#newCustomer").value.trim();
     const subscriptionMonths=Math.max(1,Number($("#subscriptionMonths")?.value||1));
+    const sessionsTotal=Math.max(0,Number($("#sessionsTotal")?.value||0));
     if(!name)return alert("กรุณากรอกชื่อลูกเทรน");
     if(!Number.isFinite(subscriptionMonths)||subscriptionMonths<1)return alert("กรุณากรอกระยะเวลาอย่างน้อย 1 เดือน");
-    const id=uid(),used=S.data.customers.map(c=>c.code);let code;
+    const used=S.data.customers.map(c=>c.code);let code;
     do{code=String(Math.floor(10000+Math.random()*90000))}while(used.includes(code));
-    S.data.customers.push({
-      id,
-      name,
-      code,
-      startDate:today(),
-      startDateISO:isoToday(),
-      subscriptionMonths
+    const customer=createCustomerRecord({
+      id:uid(),name,code,subscriptionMonths,sessionsTotal,
+      phone:$("#customerPhone")?.value.trim(),goal:$("#customerGoal")?.value,
+      coachNote:$("#customerNote")?.value.trim(),startDate:today(),startDateISO:isoToday()
     });
-    S.data.programs[id]={days:[]};
-    S.data.logs[id]=[];
-    S.data.bodyStats[id]=[];
+    S.data.customers.push(customer);
+    S.data.programs[customer.id]={days:[]};
+    S.data.logs[customer.id]=[];
+    S.data.bodyStats[customer.id]=[];
     S.showAdd=false;
     S.lastCode={name,code,subscriptionMonths};
     save();
     renderFromTop();
   };
 }
-
 
 function getExerciseLibraryItems(){
   const catalog=S.data.catalog||{};
@@ -890,8 +923,46 @@ function getTemplateExerciseName(exerciseId){
   return getExerciseLibraryItems().find(item=>String(item.id)===String(exerciseId))?.name||"Exercise";
 }
 
+
+let templateAutoSaveTimer=null;
+function queueTemplateAutoSave(message="บันทึกอัตโนมัติแล้ว"){
+  clearTimeout(templateAutoSaveTimer);
+  templateAutoSaveTimer=setTimeout(()=>{
+    save();
+    showToast(message);
+  },450);
+}
+function cloneProgramExercise(item){
+  return {
+    exerciseId:String(item?.exerciseId||""),
+    sets:Number(item?.sets||3),
+    reps:String(item?.reps||"10-12"),
+    rest:String(item?.rest||"60 sec"),
+    rpe:String(item?.rpe||""),
+    note:String(item?.note||"")
+  };
+}
+function cloneProgramDay(day,name){
+  return {
+    id:uid(),
+    name:name||`${String(day?.name||"Day")} Copy`,
+    exercises:asArray(day?.exercises).map(cloneProgramExercise)
+  };
+}
+function cloneProgramTemplate(template){
+  return {
+    id:uid(),
+    name:`${String(template?.name||"Template")} Copy`,
+    category:String(template?.category||"General"),
+    description:String(template?.description||""),
+    createdAt:isoToday(),
+    favorite:false,
+    days:asArray(template?.days).map((day,index)=>cloneProgramDay(day,String(day?.name||`Day ${index+1}`)))
+  };
+}
+
 function renderTemplatesPlaceholder(){
-  const templates=asArray(S.data.programTemplates);
+  const templates=asArray(S.data.programTemplates).sort((a,b)=>Number(Boolean(b.favorite))-Number(Boolean(a.favorite)));
   const library=getExerciseLibraryItems();
   const editingTemplate=templates.find(item=>String(item.id)===String(S.editingTemplateId));
   const editingDay=editingTemplate?.days?.find(day=>String(day.id)===String(S.editingTemplateDayId));
@@ -907,9 +978,9 @@ function renderTemplatesPlaceholder(){
     ${nav("templates")}
 
     <section class="hero-dashboard template-placeholder-hero">
-      <div class="hero-eyebrow">📋 PROGRAM TEMPLATES</div>
-      <h1 class="hero-title">สร้างโปรแกรมให้เสร็จในไม่กี่นาที</h1>
-      <p class="hero-subtitle">เพิ่มวันฝึก เลือกท่าจาก Exercise Library และกำหนด Sets / Reps แบบง่าย ๆ</p>
+      <div class="hero-eyebrow">⚡ SMART PROGRAM BUILDER</div>
+      <h1 class="hero-title">ออกโปรแกรมเร็วขึ้น แก้ไขแล้วบันทึกอัตโนมัติ</h1>
+      <p class="hero-subtitle">ลากเรียงท่า ทำสำเนาวันหรือ Template และปักดาวรายการที่ใช้บ่อย</p>
       <div class="hero-actions">
         <button class="btn btn-primary" id="toggleTemplateForm">
           ${S.showTemplateForm?"ปิดแบบฟอร์ม":"＋ สร้าง Template"}
@@ -928,13 +999,8 @@ function renderTemplatesPlaceholder(){
           <label class="field-label">
             หมวดหมู่
             <select class="input" id="templateCategory">
-              <option>General</option>
-              <option>Strength</option>
-              <option>Hypertrophy</option>
-              <option>Fat Loss</option>
-              <option>Mobility</option>
-              <option>Beginner</option>
-              <option>Advanced</option>
+              <option>General</option><option>Strength</option><option>Hypertrophy</option>
+              <option>Fat Loss</option><option>Mobility</option><option>Beginner</option><option>Advanced</option>
             </select>
           </label>
         </div>
@@ -952,7 +1018,7 @@ function renderTemplatesPlaceholder(){
         <b>${templates.length}</b>
         <span>Template ที่บันทึกไว้</span>
       </div>
-      <span class="badge badge-accent">${library.length} EXERCISES</span>
+      <span class="badge badge-accent">AUTO SAVE ON</span>
     </div>
 
     <div class="template-basic-list">
@@ -960,11 +1026,18 @@ function renderTemplatesPlaceholder(){
         const exerciseCount=asArray(template.days).reduce((sum,day)=>sum+asArray(day.exercises).length,0);
         const isOpen=String(template.id)===String(S.editingTemplateId);
         return `
-        <div class="template-basic-card ${isOpen?"template-active":""}">
+        <div class="template-basic-card ${isOpen?"template-active":""}" data-template-card="${template.id}">
           <div class="row-between">
             <div style="min-width:0">
-              <span class="template-category">${esc(template.category)}</span>
-              <h3>${esc(template.name)}</h3>
+              <div class="template-title-line">
+                <button class="favorite-btn ${template.favorite?"is-favorite":""}" data-favorite-template="${template.id}" title="Favorite">
+                  ${template.favorite?"★":"☆"}
+                </button>
+                <div>
+                  <span class="template-category">${esc(template.category)}</span>
+                  <h3>${esc(template.name)}</h3>
+                </div>
+              </div>
               <p>${esc(template.description||"ยังไม่มีรายละเอียด")}</p>
             </div>
             <button class="btn-danger" data-delete-basic-template="${template.id}">ลบ</button>
@@ -977,9 +1050,12 @@ function renderTemplatesPlaceholder(){
 
           <div class="template-basic-footer">
             <span>สร้างเมื่อ ${esc(template.createdAt||"-")}</span>
-            <button class="btn btn-ghost btn-small" data-open-template="${template.id}">
-              ${isOpen?"ปิด":"จัดโปรแกรม"}
-            </button>
+            <div class="template-card-actions">
+              <button class="btn btn-ghost btn-small" data-duplicate-template="${template.id}">Duplicate</button>
+              <button class="btn btn-ghost btn-small" data-open-template="${template.id}">
+                ${isOpen?"ปิด":"จัดโปรแกรม"}
+              </button>
+            </div>
           </div>
 
           ${isOpen?`
@@ -996,14 +1072,17 @@ function renderTemplatesPlaceholder(){
                 ${asArray(template.days).length?asArray(template.days).map((day,dayIndex)=>{
                   const activeDay=String(day.id)===String(S.editingTemplateDayId);
                   return `
-                  <button class="template-day-row ${activeDay?"is-active":""}" data-open-template-day="${day.id}">
-                    <span class="template-day-number">${dayIndex+1}</span>
-                    <span class="template-day-info">
-                      <b>${esc(day.name)}</b>
-                      <small>${asArray(day.exercises).length} ท่า</small>
-                    </span>
-                    <span class="template-day-arrow">›</span>
-                  </button>`;
+                  <div class="template-day-row-wrap">
+                    <button class="template-day-row ${activeDay?"is-active":""}" data-open-template-day="${day.id}">
+                      <span class="template-day-number">${dayIndex+1}</span>
+                      <span class="template-day-info">
+                        <b>${esc(day.name)}</b>
+                        <small>${asArray(day.exercises).length} ท่า</small>
+                      </span>
+                      <span class="template-day-arrow">›</span>
+                    </button>
+                    <button class="day-duplicate-btn" data-duplicate-day="${day.id}" title="Duplicate day">⧉</button>
+                  </div>`;
                 }).join(""):`
                   <div class="empty-state compact">
                     ยังไม่มีวันฝึก<br><span class="small">กด “เพิ่มวัน” เพื่อเริ่ม</span>
@@ -1020,20 +1099,28 @@ function renderTemplatesPlaceholder(){
                     <button class="btn-danger" id="deleteTemplateDay">ลบวัน</button>
                   </div>
 
-                  <div class="template-exercise-list">
+                  <div class="autosave-note">แก้ไขแล้วระบบจะบันทึกอัตโนมัติ</div>
+
+                  <div class="template-exercise-list" id="templateExerciseSortable">
                     ${asArray(editingDay.exercises).length?asArray(editingDay.exercises).map((item,index)=>{
                       const exercise=library.find(ex=>String(ex.id)===String(item.exerciseId));
                       const key=`${template.id}:${editingDay.id}:${index}`;
                       const advanced=!!S.showTemplateAdvanced[key];
                       return `
-                      <div class="template-program-exercise">
+                      <div class="template-program-exercise" draggable="true" data-drag-index="${index}">
                         <div class="template-program-head">
-                          <div>
+                          <div class="exercise-drag-title">
+                            <span class="drag-handle" title="ลากเพื่อเรียง">☰</span>
                             <span class="template-order">${index+1}</span>
-                            <b>${esc(exercise?.name||"Exercise")}</b>
-                            <small>${esc(exercise?.category||"Exercise Library")}</small>
+                            <div>
+                              <b>${esc(exercise?.name||"Exercise")}</b>
+                              <small>${esc(exercise?.category||"Exercise Library")}</small>
+                            </div>
                           </div>
-                          <button class="icon-btn danger" data-remove-day-exercise="${index}">×</button>
+                          <div class="exercise-inline-actions">
+                            <button class="icon-btn" data-duplicate-day-exercise="${index}" title="Duplicate">⧉</button>
+                            <button class="icon-btn danger" data-remove-day-exercise="${index}" title="Remove">×</button>
+                          </div>
                         </div>
 
                         <div class="template-simple-fields">
@@ -1071,10 +1158,6 @@ function renderTemplatesPlaceholder(){
                   <button class="btn btn-primary btn-block" id="openExercisePicker">
                     ＋ เพิ่มท่าจาก Exercise Library
                   </button>
-
-                  <button class="btn btn-ghost btn-block" id="saveTemplateDay" style="margin-top:8px">
-                    บันทึก Day
-                  </button>
                 </div>`:""}
             </div>`:""}
         </div>`}).join(""):`
@@ -1091,10 +1174,7 @@ function renderTemplatesPlaceholder(){
         <div class="template-picker-panel">
           <div class="sheet-handle"></div>
           <div class="row-between">
-            <div>
-              <h3>เลือกท่าออกกำลังกาย</h3>
-              <small>ดึงจาก Exercise Library</small>
-            </div>
+            <div><h3>เลือกท่าออกกำลังกาย</h3><small>ดึงจาก Exercise Library</small></div>
             <button class="icon-btn" id="closeExercisePickerTop">×</button>
           </div>
           <input class="input" id="templateExerciseSearch" value="${esc(S.templateExerciseSearch)}"
@@ -1103,16 +1183,10 @@ function renderTemplatesPlaceholder(){
           <div class="template-library-list">
             ${filteredLibrary.length?filteredLibrary.map(exercise=>`
               <button class="template-library-pick" data-pick-exercise="${exercise.id}">
-                <span>
-                  <b>${esc(exercise.name)}</b>
-                  <small>${esc(exercise.category)}${exercise.muscle?` · ${esc(exercise.muscle)}`:""}</small>
-                </span>
+                <span><b>${esc(exercise.name)}</b><small>${esc(exercise.category)}${exercise.muscle?` · ${esc(exercise.muscle)}`:""}</small></span>
                 <span class="add-circle">＋</span>
               </button>`).join(""):`
-              <div class="empty-state">
-                <span class="emoji">🏋️</span>
-                ${library.length?"ไม่พบท่าที่ค้นหา":"ยังไม่มีท่าใน Exercise Library"}
-              </div>`}
+              <div class="empty-state"><span class="emoji">🏋️</span>${library.length?"ไม่พบท่าที่ค้นหา":"ยังไม่มีท่าใน Exercise Library"}</div>`}
           </div>
         </div>
       </div>`:""}`;
@@ -1130,37 +1204,42 @@ function renderTemplatesPlaceholder(){
     const category=$("#templateCategory").value;
     const description=$("#templateDescription").value.trim();
     if(!name)return alert("กรุณากรอกชื่อ Template");
-
     const firstDay={id:uid(),name:"Day 1",exercises:[]};
-    const newTemplate={
-      id:uid(),
-      name,
-      category,
-      description,
-      createdAt:isoToday(),
-      days:[firstDay]
-    };
-
+    const newTemplate={id:uid(),name,category,description,createdAt:isoToday(),favorite:false,days:[firstDay]};
     S.data.programTemplates.push(newTemplate);
     S.showTemplateForm=false;
     S.editingTemplateId=newTemplate.id;
     S.editingTemplateDayId=firstDay.id;
-    save();
-    showToast("สร้าง Template แล้ว");
-    renderFromTop();
+    save(); showToast("สร้าง Template แล้ว"); renderFromTop();
   };
 
   $$("[data-open-template]").forEach(button=>button.onclick=()=>{
     const id=button.dataset.openTemplate;
     if(String(S.editingTemplateId)===String(id)){
-      S.editingTemplateId=null;
-      S.editingTemplateDayId=null;
+      S.editingTemplateId=null; S.editingTemplateDayId=null;
     }else{
       S.editingTemplateId=id;
       const template=templates.find(item=>String(item.id)===String(id));
       S.editingTemplateDayId=template?.days?.[0]?.id||null;
     }
     renderFromTop();
+  });
+
+  $$("[data-favorite-template]").forEach(button=>button.onclick=()=>{
+    const template=templates.find(item=>String(item.id)===String(button.dataset.favoriteTemplate));
+    if(!template)return;
+    template.favorite=!template.favorite;
+    save(); showToast(template.favorite?"เพิ่มเป็น Favorite แล้ว":"นำออกจาก Favorite แล้ว"); renderFromTop();
+  });
+
+  $$("[data-duplicate-template]").forEach(button=>button.onclick=()=>{
+    const template=templates.find(item=>String(item.id)===String(button.dataset.duplicateTemplate));
+    if(!template)return;
+    const copy=cloneProgramTemplate(template);
+    S.data.programTemplates.push(copy);
+    S.editingTemplateId=copy.id;
+    S.editingTemplateDayId=copy.days[0]?.id||null;
+    save(); showToast("Duplicate Template แล้ว"); renderFromTop();
   });
 
   $$("[data-add-template-day]").forEach(button=>button.onclick=()=>{
@@ -1170,14 +1249,22 @@ function renderTemplatesPlaceholder(){
     const newDay={id:uid(),name:`Day ${nextNumber}`,exercises:[]};
     template.days.push(newDay);
     S.editingTemplateDayId=newDay.id;
-    save();
-    showToast("เพิ่มวันฝึกแล้ว");
-    renderFromTop();
+    save(); showToast("เพิ่มวันฝึกแล้ว"); renderFromTop();
+  });
+
+  $$("[data-duplicate-day]").forEach(button=>button.onclick=(event)=>{
+    event.stopPropagation();
+    const day=editingTemplate?.days?.find(item=>String(item.id)===String(button.dataset.duplicateDay));
+    if(!editingTemplate||!day)return;
+    const dayIndex=editingTemplate.days.findIndex(item=>String(item.id)===String(day.id));
+    const copy=cloneProgramDay(day,`${day.name} Copy`);
+    editingTemplate.days.splice(dayIndex+1,0,copy);
+    S.editingTemplateDayId=copy.id;
+    save(); showToast("Duplicate Day แล้ว"); renderFromTop();
   });
 
   $$("[data-open-template-day]").forEach(button=>button.onclick=()=>{
-    S.editingTemplateDayId=button.dataset.openTemplateDay;
-    renderFromTop();
+    S.editingTemplateDayId=button.dataset.openTemplateDay; renderFromTop();
   });
 
   if($("#deleteTemplateDay"))$("#deleteTemplateDay").onclick=()=>{
@@ -1185,17 +1272,21 @@ function renderTemplatesPlaceholder(){
     if(!confirm(`ลบ "${editingDay.name}" ใช่หรือไม่?`))return;
     editingTemplate.days=editingTemplate.days.filter(day=>String(day.id)!==String(editingDay.id));
     S.editingTemplateDayId=editingTemplate.days[0]?.id||null;
-    save();
-    showToast("ลบวันฝึกแล้ว");
-    renderFromTop();
+    save(); showToast("ลบวันฝึกแล้ว"); renderFromTop();
   };
 
   $$("[data-remove-day-exercise]").forEach(button=>button.onclick=()=>{
     const index=Number(button.dataset.removeDayExercise);
     editingDay.exercises.splice(index,1);
-    save();
-    showToast("ลบท่าแล้ว");
-    renderFromTop();
+    save(); showToast("ลบท่าแล้ว"); renderFromTop();
+  });
+
+  $$("[data-duplicate-day-exercise]").forEach(button=>button.onclick=()=>{
+    const index=Number(button.dataset.duplicateDayExercise);
+    const source=editingDay.exercises[index];
+    if(!source)return;
+    editingDay.exercises.splice(index+1,0,cloneProgramExercise(source));
+    save(); showToast("Duplicate Exercise แล้ว"); renderFromTop();
   });
 
   $$("[data-toggle-advanced]").forEach(button=>button.onclick=()=>{
@@ -1204,52 +1295,33 @@ function renderTemplatesPlaceholder(){
     renderFromTop();
   });
 
-  if($("#saveTemplateDay"))$("#saveTemplateDay").onclick=()=>{
-    if(!editingDay)return;
-    editingDay.name=$("#templateDayName").value.trim()||editingDay.name;
-    $$("[data-day-field]").forEach(input=>{
-      const [indexText,field]=input.dataset.dayField.split(":");
-      const index=Number(indexText);
-      if(!editingDay.exercises[index])return;
-      editingDay.exercises[index][field]=field==="sets"?Number(input.value||1):input.value.trim();
-    });
-    save();
-    showToast("บันทึก Day แล้ว");
-    renderFromTop();
+  if($("#templateDayName"))$("#templateDayName").oninput=(event)=>{
+    editingDay.name=event.target.value;
+    queueTemplateAutoSave();
   };
 
-  if($("#openExercisePicker"))$("#openExercisePicker").onclick=()=>{
-    S.templatePickerOpen=true;
-    renderFromTop();
-  };
+  $$("[data-day-field]").forEach(input=>input.oninput=()=>{
+    const [indexText,field]=input.dataset.dayField.split(":");
+    const index=Number(indexText);
+    if(!editingDay.exercises[index])return;
+    editingDay.exercises[index][field]=field==="sets"?Number(input.value||1):input.value;
+    queueTemplateAutoSave();
+  });
 
-  const closePicker=()=>{
-    S.templatePickerOpen=false;
-    S.templateExerciseSearch="";
-    renderFromTop();
-  };
+  if($("#openExercisePicker"))$("#openExercisePicker").onclick=()=>{S.templatePickerOpen=true;renderFromTop();};
+
+  const closePicker=()=>{S.templatePickerOpen=false;S.templateExerciseSearch="";renderFromTop();};
   if($("#closeExercisePicker"))$("#closeExercisePicker").onclick=closePicker;
   if($("#closeExercisePickerTop"))$("#closeExercisePickerTop").onclick=closePicker;
 
   if($("#templateExerciseSearch"))$("#templateExerciseSearch").oninput=(event)=>{
-    S.templateExerciseSearch=event.target.value;
-    renderFromTop();
+    S.templateExerciseSearch=event.target.value; renderFromTop();
   };
 
   $$("[data-pick-exercise]").forEach(button=>button.onclick=()=>{
     if(!editingDay)return;
-    const exerciseId=button.dataset.pickExercise;
-    editingDay.exercises.push({
-      exerciseId,
-      sets:3,
-      reps:"10-12",
-      rest:"60 sec",
-      rpe:"",
-      note:""
-    });
-    save();
-    showToast("เพิ่มท่าแล้ว");
-    renderFromTop();
+    editingDay.exercises.push({exerciseId:button.dataset.pickExercise,sets:3,reps:"10-12",rest:"60 sec",rpe:"",note:""});
+    save(); showToast("เพิ่มท่าแล้ว"); renderFromTop();
   });
 
   $$("[data-delete-basic-template]").forEach(button=>button.onclick=()=>{
@@ -1257,13 +1329,37 @@ function renderTemplatesPlaceholder(){
     if(!template)return;
     if(!confirm(`ลบ Template "${template.name}" ใช่หรือไม่?`))return;
     S.data.programTemplates=S.data.programTemplates.filter(item=>String(item.id)!==String(template.id));
-    if(String(S.editingTemplateId)===String(template.id)){
-      S.editingTemplateId=null;
-      S.editingTemplateDayId=null;
-    }
-    save();
-    showToast("ลบ Template แล้ว");
-    renderFromTop();
+    if(String(S.editingTemplateId)===String(template.id)){S.editingTemplateId=null;S.editingTemplateDayId=null;}
+    save(); showToast("ลบ Template แล้ว"); renderFromTop();
+  });
+
+  // Native drag-and-drop exercise sorting.
+  let dragIndex=null;
+  $$("[data-drag-index]").forEach(card=>{
+    card.ondragstart=(event)=>{
+      dragIndex=Number(card.dataset.dragIndex);
+      card.classList.add("is-dragging");
+      event.dataTransfer.effectAllowed="move";
+    };
+    card.ondragend=()=>{
+      card.classList.remove("is-dragging");
+      dragIndex=null;
+    };
+    card.ondragover=(event)=>{
+      event.preventDefault();
+      event.dataTransfer.dropEffect="move";
+      card.classList.add("drag-over");
+    };
+    card.ondragleave=()=>card.classList.remove("drag-over");
+    card.ondrop=(event)=>{
+      event.preventDefault();
+      card.classList.remove("drag-over");
+      const dropIndex=Number(card.dataset.dragIndex);
+      if(dragIndex===null||dragIndex===dropIndex||!editingDay)return;
+      const [moved]=editingDay.exercises.splice(dragIndex,1);
+      editingDay.exercises.splice(dropIndex,0,moved);
+      save(); showToast("เรียงท่าแล้ว"); renderFromTop();
+    };
   });
 }
 
