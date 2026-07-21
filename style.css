@@ -873,3 +873,71 @@ body::after{
   }
 }
 
+
+/* =========================
+   V2.3.3 MEMBER DASHBOARD
+========================= */
+.member-nav{
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.member-nav::-webkit-scrollbar{display:none}
+.member-nav button{
+  min-width:108px;
+  flex:1 0 auto;
+}
+.member-dashboard-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.body-snapshot-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-bottom:15px;
+}
+.body-snapshot-card{
+  min-width:0;
+  padding:13px 10px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:linear-gradient(145deg,var(--surface2),#121220);
+}
+.body-snapshot-card span{
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+}
+.body-snapshot-card b{
+  display:block;
+  overflow:hidden;
+  margin:7px 0 2px;
+  color:var(--mint);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:24px;
+  line-height:1;
+  text-overflow:ellipsis;
+}
+.body-snapshot-card small{
+  display:block;
+  overflow:hidden;
+  color:var(--muted2);
+  font-size:8px;
+  text-overflow:ellipsis;
+}
+.body-snapshot-card .mood-value{
+  font-family:'IBM Plex Sans Thai',sans-serif;
+  font-size:13px;
+  line-height:1.25;
+}
+.member-latest-workout{
+  margin-bottom:15px;
+}
+@media(max-width:560px){
+  .member-dashboard-grid{
+    grid-template-columns:1fr 1fr;
+  }
+  .body-snapshot-card{
+    padding:11px 8px;
+  }
+}
+

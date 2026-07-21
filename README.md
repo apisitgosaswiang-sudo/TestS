@@ -1,14 +1,16 @@
-# Workout Tracker V2.3.2 Dashboard Upgrade
+# Workout Tracker V2.3.3 Member Dashboard
 
-เพิ่มเฉพาะ Trainer Dashboard:
-- คำทักทายตามช่วงเวลา
-- Workout วันนี้
-- Active / ใกล้หมดอายุ / หมดอายุ
-- Weekly Performance
-- Quick Actions เพิ่มเติม
-- Activity ล่าสุด
-- Coach Insight
-- ไม่เปลี่ยน Firebase schema
-- Program Templates ยังเป็น Placeholder
+เพิ่ม:
+- คำทักทายตามช่วงเวลาในฝั่งลูกเทรน
+- แท็บ Dashboard / Today / Check-in
+- Workout สัปดาห์นี้
+- Workout สะสม
+- วันฝึกและจำนวนท่า
+- น้ำหนักล่าสุด
+- Weekly Goal
+- Body Snapshot
+- Mood ล่าสุด
+- Workout ล่าสุด
+- ปุ่มลัดไป Today และ Check-in
 
 ตรวจ app.js ด้วย esbuild แล้วผ่าน

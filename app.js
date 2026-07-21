@@ -1,4 +1,4 @@
-window.__WORKOUT_BUILD__ = "2.3.2-dashboard";
+window.__WORKOUT_BUILD__ = "2.3.3-member-dashboard";
 import { auth, dataRef, get, set, signInAnonymously } from "./firebase.js";
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
@@ -102,7 +102,7 @@ function packageBadge(customer){
 
 const emptyData=()=>({customers:[],programs:{},logs:{},catalog:{categories:[]},bodyStats:{}});
 let saveTimer=null,ready=false;
-let S={data:null,role:null,screen:"customers",dashboardMode:true,customerId:null,activeDayId:null,customerTab:"today",programTab:"overview",entries:{},showAdd:false,lastCode:null};
+let S={data:null,role:null,screen:"customers",dashboardMode:true,customerId:null,activeDayId:null,customerTab:"dashboard",programTab:"overview",entries:{},showAdd:false,lastCode:null};
 
 function asArray(value){
   if(Array.isArray(value))return value.filter(Boolean);
@@ -243,7 +243,7 @@ function save(){
   },450);
 }
 function logout(){
-  S={...S,role:null,screen:"customers",dashboardMode:true,customerId:null,activeDayId:null,customerTab:"today",programTab:"overview",entries:{},showAdd:false,lastCode:null};
+  S={...S,role:null,screen:"customers",dashboardMode:true,customerId:null,activeDayId:null,customerTab:"dashboard",programTab:"overview",entries:{},showAdd:false,lastCode:null};
   render();
 }
 function updateHeader(){
@@ -374,6 +374,13 @@ function countTodayLogs(logs){
 }
 
 function trainerGreeting(){
+  const hour=new Date().getHours();
+  if(hour<12)return "สวัสดีตอนเช้า";
+  if(hour<17)return "สวัสดีตอนบ่าย";
+  return "สวัสดีตอนเย็น";
+}
+
+function memberGreeting(){
   const hour=new Date().getHours();
   if(hour<12)return "สวัสดีตอนเช้า";
   if(hour<17)return "สวัสดีตอนบ่าย";
@@ -865,17 +872,150 @@ function logHtml(l){
 function renderCustomer(){
   const c=S.data.customers.find(x=>String(x.id)===String(S.customerId));
   if(!c){logout();return}
-  const p=S.data.programs[c.id]||{days:[]},logs=S.data.logs[c.id]||[],stats=S.data.bodyStats[c.id]||[];
+
+  const p=S.data.programs[c.id]||{days:[]};
+  const logs=asArray(S.data.logs[c.id]);
+  const stats=asArray(S.data.bodyStats[c.id]);
   const memberPkg=packageInfo(c);
-  if(!S.activeDayId&&p.days.length)S.activeDayId=p.days[0].id;
-  const day=p.days.find(d=>String(d.id)===String(S.activeDayId));
+
+  if(!S.activeDayId&&asArray(p.days).length)S.activeDayId=asArray(p.days)[0].id;
+
+  const day=asArray(p.days).find(d=>String(d.id)===String(S.activeDayId));
   const existing=day?logs.find(l=>String(l.dayId)===String(day.id)&&l.date===today()):null;
-  const tabs=p.days.map(d=>`<button class="btn btn-pill ${String(d.id)===String(S.activeDayId)?"active":""}" data-daytab="${d.id}">${esc(d.name)}</button>`).join("");
+  const tabs=asArray(p.days).map(d=>`<button class="btn btn-pill ${String(d.id)===String(S.activeDayId)?"active":""}" data-daytab="${d.id}">${esc(d.name)}</button>`).join("");
+
   let workout="";
-  if(!p.days.length)workout=`<div class="card"><p class="small">เทรนเนอร์ยังไม่ได้กำหนดWorkout Plan</p></div>`;
-  else if(!day)workout=`<div class="card"><p class="small">ไม่พบวันฝึกที่เลือก กรุณาเลือกวันฝึกใหม่</p></div>`;
-  else if(existing)workout=`<div class="card success"><div class="success-icon">✓</div><h3>บันทึกTodayเรียบร้อยแล้ว</h3><p class="small">${esc(existing.dayName)} · ${esc(existing.date)}</p>${existing.entries.map(e=>`<div class="log">${esc(e.name)}: ${esc(e.actualSets||"-")} × ${esc(e.actualReps||"-")} ${e.completed?"✓":""}</div>`).join("")}<button class="btn" id="editToday" style="margin-top:14px">แก้ไข</button></div>`;
-  else workout=`<div class="card">${day.exercises.length?day.exercises.map(ex=>{const ce=ex.catalogId?findCatalog(ex.catalogId):null,e=S.entries[ex.id]||{};return `<div class="exercise"><div class="exercise-title">${esc(ce?.name||ex.name)}</div><div class="tags"><span class="tag">${esc(ex.sets)} เซ็ท</span><span class="tag">${esc(ex.reps)} ครั้ง</span>${ex.weight?`<span class="tag">${esc(ex.weight)} kg</span>`:""}</div>${ce?.videoUrl?`<a class="video" target="_blank" rel="noopener" href="${esc(ce.videoUrl)}">▶ ดูวิดีโอ</a>`:""}<div class="grid3 log-grid" style="margin-top:10px"><input class="input" placeholder="เซ็ทที่ทำได้" value="${esc(e.actualSets||"")}" data-entry="actualSets|${ex.id}"><input class="input" placeholder="ครั้งที่ทำได้" value="${esc(e.actualReps||"")}" data-entry="actualReps|${ex.id}"><input class="input" placeholder="น้ำหนัก kg" value="${esc(e.weight||"")}" data-entry="weight|${ex.id}"></div><label class="small" style="display:block;margin-top:9px"><input type="checkbox" data-check="${ex.id}" ${e.completed?"checked":""}> ทำแล้ว</label></div>`}).join(""):`<p class="small">Todayยังไม่มีท่าออกกำลังกาย</p>`}<button class="btn btn-primary btn-block" id="saveWorkout">Complete Workout</button></div>`;
+  if(!asArray(p.days).length){
+    workout=`<div class="card"><p class="small">เทรนเนอร์ยังไม่ได้กำหนด Workout Plan</p></div>`;
+  }else if(!day){
+    workout=`<div class="card"><p class="small">ไม่พบวันฝึกที่เลือก กรุณาเลือกวันฝึกใหม่</p></div>`;
+  }else if(existing){
+    workout=`<div class="card success">
+      <div class="success-icon">✓</div>
+      <h3>บันทึกวันนี้เรียบร้อยแล้ว</h3>
+      <p class="small">${esc(existing.dayName)} · ${esc(existing.date)}</p>
+      ${asArray(existing.entries).map(e=>`<div class="log">${esc(e.name)}: ${esc(e.actualSets||"-")} × ${esc(e.actualReps||"-")} ${e.completed?"✓":""}</div>`).join("")}
+      <button class="btn" id="editToday" style="margin-top:14px">แก้ไข</button>
+    </div>`;
+  }else{
+    workout=`<div class="card">
+      ${asArray(day.exercises).length?asArray(day.exercises).map(ex=>{
+        const ce=ex.catalogId?findCatalog(ex.catalogId):null;
+        const e=S.entries[ex.id]||{};
+        return `<div class="exercise">
+          <div class="exercise-title">${esc(ce?.name||ex.name)}</div>
+          <div class="tags">
+            <span class="tag">${esc(ex.sets)} เซ็ท</span>
+            <span class="tag">${esc(ex.reps)} ครั้ง</span>
+            ${ex.weight?`<span class="tag">${esc(ex.weight)} kg</span>`:""}
+          </div>
+          ${ce?.videoUrl?`<a class="video" target="_blank" rel="noopener" href="${esc(ce.videoUrl)}">▶ ดูวิดีโอ</a>`:""}
+          <div class="grid3 log-grid" style="margin-top:10px">
+            <input class="input" placeholder="เซ็ทที่ทำได้" value="${esc(e.actualSets||"")}" data-entry="actualSets|${ex.id}">
+            <input class="input" placeholder="ครั้งที่ทำได้" value="${esc(e.actualReps||"")}" data-entry="actualReps|${ex.id}">
+            <input class="input" placeholder="น้ำหนัก kg" value="${esc(e.weight||"")}" data-entry="weight|${ex.id}">
+          </div>
+          <label class="small" style="display:block;margin-top:9px">
+            <input type="checkbox" data-check="${ex.id}" ${e.completed?"checked":""}> ทำแล้ว
+          </label>
+        </div>`;
+      }).join(""):`<p class="small">วันนี้ยังไม่มีท่าออกกำลังกาย</p>`}
+      <button class="btn btn-primary btn-block" id="saveWorkout">Complete Workout</button>
+    </div>`;
+  }
+
+  const latestStat=stats[stats.length-1]||{};
+  const weeklyCount=countThisWeekLogs(logs);
+  const totalWorkouts=logs.length;
+  const workoutDays=asArray(p.days).length;
+  const totalExercises=asArray(p.days).reduce((sum,d)=>sum+asArray(d.exercises).length,0);
+  const latestLog=logs[logs.length-1]||null;
+  const weeklyTarget=Math.max(workoutDays||3,1);
+  const weeklyProgress=Math.min(100,Math.round((weeklyCount/weeklyTarget)*100));
+
+  const memberDashboard=`
+    <div class="dashboard-grid member-dashboard-grid">
+      <div class="metric-card">
+        <div class="metric-icon">🔥</div>
+        <div class="metric-label">Workout สัปดาห์นี้</div>
+        <div class="metric-value">${weeklyCount}</div>
+        <div class="metric-note">เป้าหมาย ${weeklyTarget} ครั้ง</div>
+      </div>
+      <div class="metric-card mint">
+        <div class="metric-icon">✅</div>
+        <div class="metric-label">Workout สะสม</div>
+        <div class="metric-value">${totalWorkouts}</div>
+        <div class="metric-note">ตั้งแต่เริ่มฝึก</div>
+      </div>
+      <div class="metric-card warning">
+        <div class="metric-icon">📋</div>
+        <div class="metric-label">วันฝึก</div>
+        <div class="metric-value">${workoutDays}</div>
+        <div class="metric-note">${totalExercises} ท่าทั้งหมด</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon">⚖️</div>
+        <div class="metric-label">น้ำหนักล่าสุด</div>
+        <div class="metric-value">${esc(latestStat.weight||"-")}</div>
+        <div class="metric-note">${latestStat.weight?"kg":"ยังไม่มีข้อมูล"}</div>
+      </div>
+    </div>
+
+    <div class="card weekly-performance-card">
+      <div class="row-between">
+        <div>
+          <span class="dashboard-kicker">WEEKLY GOAL</span>
+          <h3 style="margin-top:5px">ความคืบหน้าสัปดาห์นี้</h3>
+        </div>
+        <strong class="weekly-percent">${weeklyProgress}%</strong>
+      </div>
+      <div class="progress-bar dashboard-progress">
+        <span style="width:${weeklyProgress}%"></span>
+      </div>
+      <div class="row-between weekly-caption">
+        <span>${weeklyCount} Workout สำเร็จ</span>
+        <span>เป้าหมาย ${weeklyTarget}</span>
+      </div>
+    </div>
+
+    <div class="section-heading">
+      <h3>Body Snapshot</h3>
+      <button class="btn btn-pill" id="goCheckin">Check-in</button>
+    </div>
+
+    <div class="body-snapshot-grid">
+      <div class="body-snapshot-card">
+        <span>กล้ามเนื้อล่าสุด</span>
+        <b>${esc(latestStat.muscleMass||"-")}</b>
+        <small>${latestStat.muscleMass?"kg":"ยังไม่มีข้อมูล"}</small>
+      </div>
+      <div class="body-snapshot-card">
+        <span>ไขมันล่าสุด</span>
+        <b>${esc(latestStat.bodyFat||"-")}</b>
+        <small>${latestStat.bodyFat?"%":"ยังไม่มีข้อมูล"}</small>
+      </div>
+      <div class="body-snapshot-card">
+        <span>Mood ล่าสุด</span>
+        <b class="mood-value">${esc(latestStat.mood||"-")}</b>
+        <small>${latestStat.date?esc(latestStat.date):"ยังไม่มี Check-in"}</small>
+      </div>
+    </div>
+
+    <div class="section-heading">
+      <h3>Workout ล่าสุด</h3>
+      <button class="btn btn-pill" id="goToday">ดูโปรแกรมวันนี้</button>
+    </div>
+
+    ${latestLog?`<button class="activity-item member-latest-workout" id="latestWorkoutCard">
+      <span class="activity-icon">🏋️</span>
+      <span class="activity-content">
+        <b>${esc(latestLog.dayName||"Workout")}</b>
+        <small>${asArray(latestLog.entries).length} ท่า · ${esc(latestLog.date||"-")}</small>
+      </span>
+      <span>›</span>
+    </button>`:`<div class="empty-state"><span class="emoji">📭</span>ยังไม่มี Workout ล่าสุด</div>`}
+  `;
+
   const body=`<div class="card">
     <h3>Daily Check-in</h3>
     <p class="small">วันนี้คุณรู้สึกอย่างไร</p>
@@ -892,39 +1032,142 @@ function renderCustomer(){
       <input class="input" id="fat" placeholder="ไขมัน %">
     </div>
     <button class="btn btn-primary btn-block" id="saveBody" style="margin-top:10px">Save Check-in</button>
-  </div>${stats.length?stats.slice().reverse().map(s=>`<div class="card"><div class="row-between"><b>${esc(s.date)}</b><span class="small">น้ำหนัก ${esc(s.weight||"-")} kg · กล้ามเนื้อ ${esc(s.muscleMass||"-")} kg · ไขมัน ${esc(s.bodyFat||"-")}%</span></div></div>`).join(""):`<p class="small">ยังไม่มีประวัติ</p>`}`;
+  </div>
+  ${stats.length?stats.slice().reverse().map(s=>`<div class="card">
+    <div class="row-between">
+      <b>${esc(s.date)}</b>
+      <span class="small">น้ำหนัก ${esc(s.weight||"-")} kg · กล้ามเนื้อ ${esc(s.muscleMass||"-")} kg · ไขมัน ${esc(s.bodyFat||"-")}%</span>
+    </div>
+  </div>`).join(""):`<p class="small">ยังไม่มีประวัติ</p>`}`;
+
   $("#app").innerHTML=`
     <section class="hero-dashboard">
       <div class="hero-eyebrow">🔥 MEMBER DASHBOARD</div>
-      <h2 class="hero-title">สวัสดี ${esc(c.name)}</h2>
+      <h2 class="hero-title">${memberGreeting()} ${esc(c.name)}</h2>
       <p class="hero-subtitle">${today()} · รหัสสมาชิก <b style="color:var(--mint)">${esc(c.code)}</b></p>
       <div class="member-package-status ${memberPkg.className}">
         <span>${memberPkg.status==="expired"?"⛔":memberPkg.status==="soon"?"⏳":memberPkg.status==="active"?"📅":"🗓️"}</span>
-        <div><b>${esc(memberPkg.label)}</b><small>${memberPkg.configured?`ใช้งานถึง ${formatThaiDate(memberPkg.end)}`:"กรุณาติดต่อเทรนเนอร์เพื่อกำหนดแพ็กเกจ"}</small></div>
+        <div>
+          <b>${esc(memberPkg.label)}</b>
+          <small>${memberPkg.configured?`ใช้งานถึง ${formatThaiDate(memberPkg.end)}`:"กรุณาติดต่อเทรนเนอร์เพื่อกำหนดแพ็กเกจ"}</small>
+        </div>
       </div>
     </section>
-    <div class="nav"><button data-ctab="today" class="${S.customerTab==="today"?"active":""}">Today</button><button data-ctab="body" class="${S.customerTab==="body"?"active":""}">Check-in</button></div>
-    ${S.customerTab==="body"?body:`<div class="day-tabs">${tabs}</div>${workout}<h3 style="margin-top:22px">Recent Workouts</h3>${logs.length?logs.slice().reverse().map(logHtml).join(""):`<p class="small">ยังไม่มีประวัติ</p>`}`}`;
+
+    <div class="nav member-nav">
+      <button data-ctab="dashboard" class="${S.customerTab==="dashboard"?"active":""}">Dashboard</button>
+      <button data-ctab="today" class="${S.customerTab==="today"?"active":""}">Today</button>
+      <button data-ctab="body" class="${S.customerTab==="body"?"active":""}">Check-in</button>
+    </div>
+
+    ${S.customerTab==="dashboard"
+      ?memberDashboard
+      :S.customerTab==="body"
+        ?body
+        :`<div class="day-tabs">${tabs}</div>${workout}
+          <h3 style="margin-top:22px">Recent Workouts</h3>
+          ${logs.length?logs.slice().reverse().map(logHtml).join(""):`<p class="small">ยังไม่มีประวัติ</p>`}`
+    }`;
+
+  if($("#goCheckin"))$("#goCheckin").onclick=()=>{S.customerTab="body";renderFromTop()};
+  if($("#goToday"))$("#goToday").onclick=()=>{S.customerTab="today";renderFromTop()};
+  if($("#latestWorkoutCard"))$("#latestWorkoutCard").onclick=()=>{S.customerTab="today";renderFromTop()};
+
   let selectedMood="";
   $$("[data-mood]").forEach(b=>b.onclick=()=>{
     selectedMood=b.dataset.mood;
     $$("[data-mood]").forEach(x=>x.classList.toggle("active",x===b));
   });
-  $$("[data-ctab]").forEach(b=>b.onclick=()=>{S.customerTab=b.dataset.ctab;renderFromTop()});
-  $$("[data-daytab]").forEach(b=>b.onclick=()=>{S.activeDayId=b.dataset.daytab;S.entries={};renderFromTop()});
-  $$("[data-entry]").forEach(i=>i.oninput=()=>{const [field,id]=i.dataset.entry.split("|");S.entries[id]={...(S.entries[id]||{}),[field]:i.value}});
-  $$("[data-check]").forEach(i=>i.onchange=()=>{S.entries[i.dataset.check]={...(S.entries[i.dataset.check]||{}),completed:i.checked}});
-  if($("#editToday"))$("#editToday").onclick=()=>{existing.entries.forEach(e=>S.entries[e.exerciseId]={actualSets:e.actualSets,actualReps:e.actualReps,weight:e.weight,completed:e.completed});S.data.logs[c.id]=logs.filter(l=>l.id!==existing.id);render()};
+
+  $$("[data-ctab]").forEach(b=>b.onclick=()=>{
+    S.customerTab=b.dataset.ctab;
+    renderFromTop();
+  });
+
+  $$("[data-daytab]").forEach(b=>b.onclick=()=>{
+    S.activeDayId=b.dataset.daytab;
+    S.entries={};
+    renderFromTop();
+  });
+
+  $$("[data-entry]").forEach(i=>i.oninput=()=>{
+    const [field,id]=i.dataset.entry.split("|");
+    S.entries[id]={...(S.entries[id]||{}),[field]:i.value};
+  });
+
+  $$("[data-check]").forEach(i=>i.onchange=()=>{
+    S.entries[i.dataset.check]={...(S.entries[i.dataset.check]||{}),completed:i.checked};
+  });
+
+  if($("#editToday"))$("#editToday").onclick=()=>{
+    asArray(existing.entries).forEach(e=>{
+      S.entries[e.exerciseId]={
+        actualSets:e.actualSets,
+        actualReps:e.actualReps,
+        weight:e.weight,
+        completed:e.completed
+      };
+    });
+    S.data.logs[c.id]=logs.filter(l=>l.id!==existing.id);
+    renderFromTop();
+  };
+
   if($("#saveWorkout"))$("#saveWorkout").onclick=()=>{
     if(!day)return;
-    const log={id:uid(),date:today(),dayId:day.id,dayName:day.name,entries:day.exercises.map(ex=>{const ce=ex.catalogId?findCatalog(ex.catalogId):null,e=S.entries[ex.id]||{};return{exerciseId:ex.id,name:ce?.name||ex.name,targetSets:ex.sets,targetReps:ex.reps,actualSets:e.actualSets||"",actualReps:e.actualReps||"",weight:e.weight||"",completed:!!e.completed}})};
-    const idx=logs.findIndex(l=>l.dayId===day.id&&l.date===today());if(idx>=0){log.id=logs[idx].id;logs[idx]=log}else logs.push(log);
-    S.entries={};save();render();
+    const log={
+      id:uid(),
+      date:today(),
+      dayId:day.id,
+      dayName:day.name,
+      entries:asArray(day.exercises).map(ex=>{
+        const ce=ex.catalogId?findCatalog(ex.catalogId):null;
+        const e=S.entries[ex.id]||{};
+        return {
+          exerciseId:ex.id,
+          name:ce?.name||ex.name,
+          targetSets:ex.sets,
+          targetReps:ex.reps,
+          actualSets:e.actualSets||"",
+          actualReps:e.actualReps||"",
+          weight:e.weight||"",
+          completed:!!e.completed
+        };
+      })
+    };
+    const idx=logs.findIndex(l=>String(l.dayId)===String(day.id)&&l.date===today());
+    if(idx>=0){
+      log.id=logs[idx].id;
+      logs[idx]=log;
+    }else{
+      logs.push(log);
+    }
+    S.data.logs[c.id]=logs;
+    S.entries={};
+    save();
+    renderFromTop();
   };
+
   if($("#saveBody"))$("#saveBody").onclick=()=>{
-    const entry={id:uid(),date:today(),mood:selectedMood,weight:$("#weight").value.trim(),muscleMass:$("#muscle").value.trim(),bodyFat:$("#fat").value.trim()};
-    if(!entry.weight&&!entry.muscleMass&&!entry.bodyFat)return;
-    const idx=stats.findIndex(x=>x.date===entry.date);if(idx>=0){entry.id=stats[idx].id;stats[idx]=entry}else stats.push(entry);save();render();
+    const entry={
+      id:uid(),
+      date:today(),
+      mood:selectedMood,
+      weight:$("#weight").value.trim(),
+      muscleMass:$("#muscle").value.trim(),
+      bodyFat:$("#fat").value.trim()
+    };
+    if(!entry.weight&&!entry.muscleMass&&!entry.bodyFat&&!entry.mood)return;
+    const idx=stats.findIndex(x=>x.date===entry.date);
+    if(idx>=0){
+      entry.id=stats[idx].id;
+      stats[idx]=entry;
+    }else{
+      stats.push(entry);
+    }
+    S.data.bodyStats[c.id]=stats;
+    save();
+    S.customerTab="dashboard";
+    renderFromTop();
   };
 }
 
