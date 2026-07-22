@@ -1,4 +1,4 @@
-const CACHE_NAME = "clob-rc3-stabilization";
+const CACHE_NAME = "clob-rc4-stabilization";
 
 const APP_SHELL = [
   "./",
