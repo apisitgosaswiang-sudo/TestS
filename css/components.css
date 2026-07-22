@@ -286,3 +286,5 @@
   font-weight: 650;
   text-align: center;
 }
+.package-unassigned { color: #6b7280; background: #f3f4f6; }
+#manage-package { width: 100%; margin-top: 18px; }
