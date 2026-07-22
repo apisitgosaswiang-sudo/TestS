@@ -6,6 +6,7 @@ let database = null;
 let dbApi = null;
 let storage = null;
 let storageApi = null;
+let firebaseError = null;
 
 export async function initializeFirebase() {
   try {
@@ -31,6 +32,7 @@ export async function initializeFirebase() {
     storage = getStorage(app);
     storageApi = { storageRef, uploadBytesResumable, getDownloadURL, deleteObject };
     firebaseReady = true;
+    firebaseError = null;
 
     window.dispatchEvent(new CustomEvent("clob:firebase-status", {
       detail: { ready: true, uid: authUser.uid }
@@ -38,6 +40,8 @@ export async function initializeFirebase() {
 
     return { ready: true, user: authUser };
   } catch (error) {
+    firebaseReady = false;
+    firebaseError = error;
     console.warn("Firebase initialization failed:", error);
 
     window.dispatchEvent(new CustomEvent("clob:firebase-status", {
@@ -49,7 +53,7 @@ export async function initializeFirebase() {
 }
 
 export function getFirebaseStatus() {
-  return { ready: firebaseReady, user: authUser };
+  return { ready: firebaseReady, user: authUser, error: firebaseError };
 }
 
 export async function getMemberByCode(code) {

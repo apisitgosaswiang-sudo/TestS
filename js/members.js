@@ -1,4 +1,4 @@
-import { getAllMembers, getWorkoutSessions, saveMemberRecord, memberCodeExists } from "./firebase.js";
+import { getAllMembers, getWorkoutSessions, saveMemberRecord, memberCodeExists, getFirebaseStatus } from "./firebase.js";
 
 const DEMO_MEMBERS = {};
 
@@ -21,11 +21,12 @@ function saveLocalMember(code, payload) {
 
 export async function loadMembers() {
   const [remoteMembers, remoteSessions] = await Promise.all([getAllMembers(), getWorkoutSessions()]);
-  const merged = { ...(remoteMembers ?? {}) };
-  Object.entries(getLocalMembers()).forEach(([code, payload]) => {
-    merged[code] = { ...(merged[code] || {}), ...payload, package: { ...(merged[code]?.package || {}), ...(payload.package || {}) } };
-  });
-  return normalizeMembers(merged, remoteSessions);
+  const { ready } = getFirebaseStatus();
+  if (ready) {
+    localStorage.setItem(LOCAL_MEMBERS_KEY, JSON.stringify(remoteMembers || {}));
+    return normalizeMembers(remoteMembers || {}, remoteSessions);
+  }
+  return normalizeMembers(getLocalMembers(), remoteSessions);
 }
 
 export async function saveMember(member, { isNew = false } = {}) {
@@ -38,12 +39,18 @@ export async function saveMember(member, { isNew = false } = {}) {
     weight: member.weight === "" ? "-" : member.weight, goal: member.goal || "-", status: member.status || "active",
     joinedAt: member.joinedAt || new Date().toISOString().slice(0,10),
     package: {
+      catalogId: member.package?.catalogId || "custom",
       name: member.package?.name || "Online Coaching Monthly", startDate: member.package?.startDate || "", endDate: member.package?.endDate || "",
-      billingCycle: "monthly", price: Number(member.package?.price || 0), renewal: member.package?.renewal || "manual",
+      billingCycle: member.package?.billingCycle || "monthly", price: Number(member.package?.price || 0), renewal: member.package?.renewal || "manual",
       status: member.package?.status || "active", features: member.package?.features || { program:true, weeklyCheckin:true, habitTracking:true, coachReview:true }
     }, updatedAt: Date.now()
   };
-  saveLocalMember(code,payload); await saveMemberRecord(code,payload); return { code, ...payload };
+  const savedRemotely = await saveMemberRecord(code, payload);
+  if (!savedRemotely) {
+    throw new Error("บันทึก Firebase ไม่สำเร็จ กรุณาตรวจอินเทอร์เน็ตและ Firebase Rules");
+  }
+  saveLocalMember(code, payload);
+  return { code, ...payload };
 }
 
 function normalizeMembers(source, sessions) {
@@ -62,6 +69,7 @@ function normalizeMembers(source, sessions) {
       goal: member.goal || "-",
       status: member.status || "active",
       joinedAt: member.joinedAt || "-",
+      packageCatalogId: pkg.catalogId || "custom",
       packageName: pkg.name || "No Package",
       packageStartDate: pkg.startDate || "-",
       packageEndDate: pkg.endDate || "-",

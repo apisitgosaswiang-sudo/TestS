@@ -16,6 +16,7 @@ import {
   countProgramExercises,
   getExerciseLibrary
 } from "./programs.js";
+import { normalizeProgram } from "./data-normalizer.js";
 
 const app = document.querySelector("#app");
 let programsCache = [];
@@ -50,7 +51,7 @@ export async function renderProgramsPage() {
   }
 
   try {
-    programsCache = await loadPrograms();
+    programsCache = (await loadPrograms()).map((program) => normalizeProgram(program));
   } catch (error) {
     console.error("Programs failed to load:", error);
     programsCache = [];
@@ -150,7 +151,12 @@ function bindProgramsPage() {
     button.addEventListener("click", async () => {
       const source = programsCache.find((item) => item.id === button.dataset.duplicate);
       const copy = duplicateProgram(source);
-      await saveProgram(copy);
+      try {
+        await saveProgram(copy);
+      } catch (error) {
+        showToast(error.message || "Duplicate ไม่สำเร็จ");
+        return;
+      }
       programsCache.unshift(copy);
       document.querySelector("#program-list").innerHTML = programListMarkup(programsCache);
       bindProgramsPage();
@@ -161,7 +167,12 @@ function bindProgramsPage() {
   document.querySelectorAll("[data-archive]").forEach((button) => {
     button.addEventListener("click", async () => {
       const program = programsCache.find((item) => item.id === button.dataset.archive);
-      await archiveProgram(program);
+      try {
+        await archiveProgram(program);
+      } catch (error) {
+        showToast(error.message || "Archive ไม่สำเร็จ");
+        return;
+      }
       document.querySelector("#program-list").innerHTML = programListMarkup(programsCache);
       bindProgramsPage();
       showToast("Archive Program แล้ว");
@@ -170,8 +181,13 @@ function bindProgramsPage() {
 
   document.querySelector("#new-program").addEventListener("click", async () => {
     const program = createBlankProgram();
-    await saveProgram(program);
-    navigate(`/program-builder-${program.id}`);
+    try {
+      await saveProgram(program);
+      programsCache.unshift(program);
+      navigate(`/program-builder-${program.id}`);
+    } catch (error) {
+      showToast(error.message || "สร้าง Program ไม่สำเร็จ");
+    }
   });
 
   document.querySelector("#program-search").addEventListener("input", (event) => {
@@ -195,9 +211,10 @@ export async function renderProgramBuilder(programId) {
     return;
   }
 
-  if (!programsCache.length) programsCache = await loadPrograms();
+  if (!programsCache.length) programsCache = (await loadPrograms()).map((program) => normalizeProgram(program));
 
   currentProgram = programsCache.find((item) => item.id === programId);
+  if (currentProgram) currentProgram = normalizeProgram(currentProgram);
   if (!currentProgram) {
     navigate("/programs");
     return;
@@ -211,7 +228,9 @@ export async function renderProgramBuilder(programId) {
 }
 
 function renderBuilder() {
-  const activeDay = currentProgram.days.find((day) => day.id === activeDayId);
+  currentProgram = normalizeProgram(currentProgram);
+  const activeDay = currentProgram.days.find((day) => day.id === activeDayId) || currentProgram.days[0];
+  activeDayId = activeDay.id;
 
   page(`
     <div class="builder-screen">
@@ -264,7 +283,7 @@ function renderBuilder() {
       </section>
 
       <section class="builder-exercise-list">
-        ${activeDay.exercises.length ? activeDay.exercises.map((exercise, index) =>
+        ${Array.isArray(activeDay.exercises) && activeDay.exercises.length ? activeDay.exercises.map((exercise, index) =>
           exerciseEditorMarkup(exercise, index)
         ).join("") : `
           <div class="builder-empty card">

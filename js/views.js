@@ -1,6 +1,7 @@
 import { APP_CONFIG } from "./config.js";
 import { navigate } from "./router.js";
 import { loadMember, createWorkoutSession, getActiveWorkoutSession } from "./member.js";
+import { getFirebaseStatus } from "./firebase.js";
 
 const app = document.querySelector("#app");
 
@@ -21,12 +22,14 @@ function bindFirebaseStatus() {
   const status = document.querySelector("#firebase-status");
   if (!status) return;
 
-  window.addEventListener("clob:firebase-status", (event) => {
-    const { ready } = event.detail;
+  const renderStatus = ({ ready }) => {
     status.innerHTML = ready
       ? `<span class="status-dot is-online"></span><span>Firebase connected</span>`
-      : `<span class="status-dot"></span><span>โหมดออฟไลน์ — หน้าเว็บยังใช้งานได้</span>`;
-  }, { once: true });
+      : `<span class="status-dot"></span><span>ยังไม่ได้เชื่อมฐานข้อมูล — กรุณาตรวจอินเทอร์เน็ตหรือ Firebase Rules</span>`;
+  };
+
+  renderStatus(getFirebaseStatus());
+  window.addEventListener("clob:firebase-status", (event) => renderStatus(event.detail), { once: true });
 }
 
 function getGreeting() {

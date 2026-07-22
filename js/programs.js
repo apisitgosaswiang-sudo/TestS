@@ -3,10 +3,12 @@ import {
   getPrograms,
   saveProgram as saveProgramRemote,
   deleteProgram as deleteProgramRemote,
-  assignProgramToMember
+  assignProgramToMember,
+  getFirebaseStatus
 } from "./firebase.js";
 
 const STORAGE_KEY = "clob_programs_v1";
+import { normalizeProgram, normalizeProgramMap } from "./data-normalizer.js";
 
 const EXERCISE_LIBRARY = [
   { id: "goblet-squat", name: "Goblet Squat", category: "Squat", equipment: "Dumbbell" },
@@ -50,12 +52,15 @@ export async function getExerciseLibrary() {
 
 export async function loadPrograms() {
   const remote = await getPrograms();
-  if (remote) {
-    saveProgramsLocal(remote);
-    return Object.values(remote);
+  const { ready } = getFirebaseStatus();
+
+  if (ready) {
+    const normalizedRemote = normalizeProgramMap(remote || {});
+    saveProgramsLocal(normalizedRemote);
+    return Object.values(normalizedRemote);
   }
 
-  const local = loadProgramsLocal();
+  const local = normalizeProgramMap(loadProgramsLocal());
   return Object.values(local);
 }
 
@@ -80,7 +85,7 @@ export function createBlankProgram() {
 }
 
 export function duplicateProgram(program) {
-  const copy = JSON.parse(JSON.stringify(program));
+  const copy = JSON.parse(JSON.stringify(normalizeProgram(program)));
   const now = Date.now();
 
   copy.id = `program-${now}`;
@@ -101,13 +106,17 @@ export function duplicateProgram(program) {
 }
 
 export async function saveProgram(program) {
+  program = normalizeProgram(program);
   program.updatedAt = Date.now();
 
   const local = loadProgramsLocal();
   local[program.id] = program;
   saveProgramsLocal(local);
 
-  await saveProgramRemote(program.id, program);
+  const savedRemotely = await saveProgramRemote(program.id, program);
+  if (!savedRemotely) {
+    throw new Error("บันทึก Program ลง Firebase ไม่สำเร็จ กรุณาตรวจการเชื่อมต่อและ Firebase Rules");
+  }
   return program;
 }
 
@@ -137,11 +146,13 @@ export async function assignProgram(program, memberCode, effectiveDate) {
     JSON.stringify(payload)
   );
 
-  await assignProgramToMember(memberCode, payload);
+  const saved = await assignProgramToMember(memberCode, payload);
+  if (!saved) throw new Error("Assign Program ลง Firebase ไม่สำเร็จ");
   return payload;
 }
 
 export function addDay(program) {
+  program.days = Array.isArray(program.days) ? program.days : [];
   const index = program.days.length + 1;
   program.days.push({
     id: `day-${Date.now()}`,
@@ -152,6 +163,7 @@ export function addDay(program) {
 }
 
 export function removeDay(program, dayId) {
+  program.days = Array.isArray(program.days) ? program.days : [];
   if (program.days.length <= 1) return program;
   program.days = program.days.filter((day) => day.id !== dayId);
   return program;
@@ -162,6 +174,7 @@ export function addExercise(program, dayId, exerciseId) {
   const base = exerciseLibraryCache.find((item) => item.id === exerciseId) || EXERCISE_LIBRARY.find((item) => item.id === exerciseId);
   if (!day || !base) return program;
 
+  day.exercises = Array.isArray(day.exercises) ? day.exercises : [];
   day.exercises.push({
     uid: `${exerciseId}-${Math.random().toString(36).slice(2, 8)}`,
     exerciseId,
@@ -182,7 +195,7 @@ export function addExercise(program, dayId, exerciseId) {
 export function removeExercise(program, dayId, exerciseUid) {
   const day = program.days.find((item) => item.id === dayId);
   if (!day) return program;
-  day.exercises = day.exercises.filter((item) => item.uid !== exerciseUid);
+  day.exercises = (Array.isArray(day.exercises) ? day.exercises : []).filter((item) => item.uid !== exerciseUid);
   return program;
 }
 
@@ -190,6 +203,7 @@ export function moveExercise(program, dayId, exerciseUid, direction) {
   const day = program.days.find((item) => item.id === dayId);
   if (!day) return program;
 
+  day.exercises = Array.isArray(day.exercises) ? day.exercises : [];
   const index = day.exercises.findIndex((item) => item.uid === exerciseUid);
   if (index < 0) return program;
 
@@ -205,7 +219,10 @@ export function moveExercise(program, dayId, exerciseUid, direction) {
 }
 
 export function countProgramExercises(program) {
-  return program.days.reduce((total, day) => total + day.exercises.length, 0);
+  return (Array.isArray(program?.days) ? program.days : []).reduce(
+    (total, day) => total + (Array.isArray(day?.exercises) ? day.exercises.length : 0),
+    0
+  );
 }
 
 function loadProgramsLocal() {

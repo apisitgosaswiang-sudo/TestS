@@ -1,5 +1,5 @@
 import { initializeFirebase } from "./firebase.js";
-import { registerRoute, startRouter } from "./router.js";
+import { registerRoute, registerPatternRoute, startRouter } from "./router.js";
 import {
   renderLanding,
   renderTrainerLogin,
@@ -38,6 +38,15 @@ registerRoute("/trainer", renderTrainerDashboardPage);
 registerRoute("/members", renderMembersPage);
 registerRoute("/programs", renderProgramsPage);
 registerRoute("/library", renderExerciseLibraryPage);
+registerPatternRoute(/^\/workout-exercise-(\d+)$/, (index) => renderExerciseTracker(Number(index)));
+registerPatternRoute(/^\/member-edit-([^/]+)$/, renderEditMemberPage);
+registerPatternRoute(/^\/member-package-([^/]+)$/, renderPackagePage);
+registerPatternRoute(/^\/member-progress-([^/]+)$/, renderMemberProgressPage);
+registerPatternRoute(/^\/member-detail-([^/]+)$/, renderMemberDetail);
+registerPatternRoute(/^\/weekly-checkins-([^/]+)$/, renderWeeklyCheckinPage);
+registerPatternRoute(/^\/progress-photos-([^/]+)$/, renderProgressPhotosPage);
+registerPatternRoute(/^\/progress-([^/]+)$/, renderProgressPage);
+registerPatternRoute(/^\/program-builder-(.+)$/, renderProgramBuilder);
 registerRoute("/404", () => {
   const path = window.location.hash.replace(/^#/, "");
 
@@ -96,9 +105,31 @@ registerRoute("/404", () => {
   renderNotFound();
 });
 
+
+function updateFirebaseBanner(detail) {
+  const existing = document.querySelector("#global-firebase-banner");
+  if (detail?.ready) {
+    existing?.remove();
+    return;
+  }
+  if (window.location.hash === "#/" || window.location.hash === "") return;
+  const banner = existing || document.createElement("div");
+  banner.id = "global-firebase-banner";
+  banner.className = "global-firebase-banner";
+  banner.setAttribute("role", "alert");
+  banner.textContent = "ยังไม่ได้เชื่อมฐานข้อมูล ข้อมูลที่เห็นอาจเป็นข้อมูลสำรองในเครื่อง และการบันทึกอาจไม่สำเร็จ";
+  if (!existing) document.body.prepend(banner);
+}
+
+window.addEventListener("clob:firebase-status", (event) => updateFirebaseBanner(event.detail));
+window.addEventListener("hashchange", () => {
+  import("./firebase.js").then(({ getFirebaseStatus }) => updateFirebaseBanner(getFirebaseStatus()));
+});
+
 async function bootstrap() {
-  await initializeFirebase();
+  const firebaseStatus = await initializeFirebase();
   startRouter();
+  updateFirebaseBanner(firebaseStatus);
 }
 
 bootstrap();

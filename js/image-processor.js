@@ -89,9 +89,15 @@ export function createImageCropper({ file, canvas, zoomInput, onReady }) {
       const outputCtx = output.getContext("2d");
       outputCtx.drawImage(canvas, 0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
-      const blob = await new Promise((resolve) => {
+      let blob = await new Promise((resolve) => {
         output.toBlob(resolve, "image/webp", QUALITY);
       });
+
+      if (!blob || blob.type !== "image/webp") {
+        blob = await new Promise((resolve) => {
+          output.toBlob(resolve, "image/jpeg", QUALITY);
+        });
+      }
 
       if (!blob) throw new Error("Could not process image.");
       return {
