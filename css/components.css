@@ -298,3 +298,72 @@
 .package-list{display:grid;gap:10px}.package-list-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px}.package-list-copy{display:grid;gap:4px;min-width:0}.package-list-copy>span,.package-list-copy>small{color:var(--muted);font-size:.72rem}.package-list-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.package-status{padding:3px 7px;border-radius:999px;font-size:.58rem;font-weight:750}.package-status-active{background:#ecfdf5;color:#047857}.package-status-hidden{background:#f3f4f6;color:#4b5563}.package-status-archived{background:#fff1f2;color:#9f1239}
 .package-editor-backdrop{position:fixed;inset:0;z-index:10000;background:rgba(17,24,39,.38);display:grid;place-items:end center;padding:16px}.package-editor{width:min(100%,560px);max-height:88vh;overflow:auto;padding:18px;border-radius:18px}.package-editor header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.package-editor h2{margin:0}.package-editor form,.package-editor label{display:grid;gap:7px}.package-editor form{gap:13px}.package-editor label span{font-size:.68rem;color:var(--muted)}.package-editor input,.package-editor select,.package-editor textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:11px;background:#fff}.package-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.package-editor-actions{display:flex;justify-content:flex-end;gap:8px}.compact-button{width:auto!important;min-height:38px;padding:8px 14px!important}
 @media(max-width:520px){.package-editor-grid{grid-template-columns:1fr}.package-editor-backdrop{padding:0;place-items:end}.package-editor{border-radius:18px 18px 0 0}}
+
+/* Patch-005: member PIN modal */
+.pin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: end center;
+  padding: 20px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.pin-modal-card {
+  width: min(100%, 430px);
+  border-radius: 24px;
+  padding: 22px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
+}
+
+.pin-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pin-modal-header h2 {
+  margin: 2px 0 0;
+  font-size: 1.45rem;
+}
+
+.pin-modal-help {
+  margin: 10px 0 20px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.pin-modal-card .field-label {
+  display: block;
+  margin-top: 14px;
+}
+
+.pin-modal-card .button-primary {
+  width: 100%;
+  margin-top: 18px;
+}
+
+.pin-modal-card .button-text {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.pin-close-button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f5f9;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+@media (min-width: 680px) {
+  .pin-modal-backdrop { place-items: center; }
+}
