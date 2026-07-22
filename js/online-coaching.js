@@ -1,36 +1,6 @@
 const STORAGE_KEY = "clob_online_coaching_state";
 
-const DEFAULT_STATE = {
-  notifications: [
-    {
-      id: "n1",
-      type: "overdue",
-      title: "Check-in overdue",
-      message: "Mint is 2 days overdue.",
-      memberCode: "10001",
-      createdAt: Date.now() - 7200000,
-      read: false
-    },
-    {
-      id: "n2",
-      type: "review",
-      title: "Waiting for review",
-      message: "Bank submitted a weekly check-in.",
-      memberCode: "10002",
-      createdAt: Date.now() - 3600000,
-      read: false
-    },
-    {
-      id: "n3",
-      type: "inactive",
-      title: "Member inactive",
-      message: "Jane has no workout activity for 5 days.",
-      memberCode: "10003",
-      createdAt: Date.now() - 1800000,
-      read: true
-    }
-  ]
-};
+const DEFAULT_STATE = { notifications: [] };
 
 export function loadOnlineCoachingState() {
   try {
@@ -74,8 +44,8 @@ export function getDashboardSummary(members = [], checkins = []) {
 
   return {
     activeClients,
-    waitingForReview: waitingForReview || 5,
-    overdue: overdue || 2,
-    dueToday: dueToday || 8
+    waitingForReview,
+    overdue,
+    dueToday
   };
 }

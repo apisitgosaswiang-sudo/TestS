@@ -207,7 +207,7 @@ export async function renderTrainerDashboard() {
         return;
       }
 
-      showToast("Coming soon");
+      navigate("/trainer-settings");
     });
   });
 }

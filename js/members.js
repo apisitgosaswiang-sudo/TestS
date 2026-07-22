@@ -1,95 +1,6 @@
 import { getAllMembers, getWorkoutSessions, saveMemberRecord, memberCodeExists } from "./firebase.js";
 
-const DEMO_MEMBERS = {
-  "12345": {
-    name: "Apisit",
-    phone: "089-123-4567",
-    gender: "ชาย",
-    age: 29,
-    height: 178,
-    weight: 78.2,
-    goal: "ลดไขมันและเพิ่มกล้ามเนื้อ",
-    status: "active",
-    joinedAt: "2026-05-01",
-    package: {
-      name: "Premium 30 Days",
-      startDate: "2026-07-05",
-      endDate: "2026-08-04",
-      daysLeft: 18,
-      sessionsLeft: 7,
-      totalSessions: 12
-    },
-    lastWorkoutStatus: "completed",
-    lastWorkoutTitle: "Upper Body A",
-    lastWorkoutUpdatedAt: Date.now() - 1000 * 60 * 38
-  },
-  "54321": {
-    name: "Mina",
-    phone: "086-222-4411",
-    gender: "หญิง",
-    age: 31,
-    height: 164,
-    weight: 58.4,
-    goal: "เพิ่มความแข็งแรง",
-    status: "active",
-    joinedAt: "2026-05-10",
-    package: {
-      name: "Premium 30 Days",
-      startDate: "2026-07-09",
-      endDate: "2026-08-08",
-      daysLeft: 5,
-      sessionsLeft: 2,
-      totalSessions: 12
-    },
-    lastWorkoutStatus: "in_progress",
-    lastWorkoutTitle: "Lower Body B",
-    lastWorkoutUpdatedAt: Date.now() - 1000 * 60 * 12
-  },
-  "10001": {
-    name: "John",
-    phone: "081-888-0101",
-    gender: "ชาย",
-    age: 34,
-    height: 181,
-    weight: 84.8,
-    goal: "ลดน้ำหนัก",
-    status: "active",
-    joinedAt: "2026-04-18",
-    package: {
-      name: "Starter 8 Sessions",
-      startDate: "2026-06-20",
-      endDate: "2026-07-23",
-      daysLeft: 2,
-      sessionsLeft: 1,
-      totalSessions: 8
-    },
-    lastWorkoutStatus: "not_started",
-    lastWorkoutTitle: "Full Body",
-    lastWorkoutUpdatedAt: Date.now() - 1000 * 60 * 60 * 7
-  },
-  "10002": {
-    name: "Nan",
-    phone: "095-991-8832",
-    gender: "หญิง",
-    age: 27,
-    height: 160,
-    weight: 52.1,
-    goal: "กระชับสัดส่วน",
-    status: "inactive",
-    joinedAt: "2026-03-12",
-    package: {
-      name: "Premium 30 Days",
-      startDate: "2026-05-01",
-      endDate: "2026-05-31",
-      daysLeft: 0,
-      sessionsLeft: 0,
-      totalSessions: 12
-    },
-    lastWorkoutStatus: "completed",
-    lastWorkoutTitle: "Upper Body A",
-    lastWorkoutUpdatedAt: Date.now() - 1000 * 60 * 60 * 24 * 9
-  }
-};
+const DEMO_MEMBERS = {};
 
 const LOCAL_MEMBERS_KEY = "clob_hotfix_members_overlay";
 
@@ -110,7 +21,7 @@ function saveLocalMember(code, payload) {
 
 export async function loadMembers() {
   const [remoteMembers, remoteSessions] = await Promise.all([getAllMembers(), getWorkoutSessions()]);
-  const merged = { ...(remoteMembers || DEMO_MEMBERS) };
+  const merged = { ...(remoteMembers ?? {}) };
   Object.entries(getLocalMembers()).forEach(([code, payload]) => {
     merged[code] = { ...(merged[code] || {}), ...payload, package: { ...(merged[code]?.package || {}), ...(payload.package || {}) } };
   });

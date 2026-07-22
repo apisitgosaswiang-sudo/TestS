@@ -83,9 +83,7 @@ export function renderLanding() {
       <button id="member-login-button" class="button button-primary">
         เข้าสู่ระบบสมาชิก
       </button>
-      <p id="member-helper" class="helper">
-        ทดสอบด้วยรหัส 12345
-      </p>
+      
       <div id="member-error" hidden></div>
     </section>
 

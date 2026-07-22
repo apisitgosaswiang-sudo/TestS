@@ -26,7 +26,8 @@ export async function renderTrainerDashboardPage() {
 
   members = await loadMembers();
   profile = getTrainerProfile();
-  notifications = loadOnlineCoachingState().notifications;
+  const validCodes = new Set(members.map((member) => member.code));
+  notifications = loadOnlineCoachingState().notifications.filter((item) => validCodes.has(item.memberCode));
   render();
 }
 
@@ -103,33 +104,27 @@ function summaryCard(label, value, sublabel, id = "") {
 }
 
 function attentionMarkup() {
-  const cards = [
-    {
-      code: members[0]?.code || "10001",
-      name: members[0]?.name || "Mint",
-      message: "Check-in overdue by 2 days",
-      tone: "danger"
-    },
-    {
-      code: members[1]?.code || "10002",
-      name: members[1]?.name || "Bank",
-      message: "Weekly check-in waiting for review",
-      tone: "warning"
-    },
-    {
-      code: members[2]?.code || "10003",
-      name: members[2]?.name || "Jane",
-      message: "Workout adherence is below target",
-      tone: "neutral"
-    }
-  ];
+  const cards = members
+    .filter((member) => member.status !== "inactive")
+    .filter((member) => member.packageDaysLeft <= 7 || member.workoutStatus !== "completed")
+    .slice(0, 3)
+    .map((member) => {
+      if (member.packageDaysLeft <= 0) {
+        return { code: member.code, name: member.name, message: "Monthly package expired", tone: "danger" };
+      }
+      if (member.packageDaysLeft <= 7) {
+        return { code: member.code, name: member.name, message: `Package expires in ${member.packageDaysLeft} days`, tone: "warning" };
+      }
+      return { code: member.code, name: member.name, message: "Workout needs attention", tone: "neutral" };
+    });
+
+  if (!cards.length) {
+    return `<article class="empty-notification card"><strong>No members need attention</strong><p>All active members are on track.</p></article>`;
+  }
 
   return cards.map((item) => `
     <button class="attention-card card" data-member-code="${escapeHtml(item.code)}">
-      ${renderAvatar({
-        name: item.name,
-        className: "attention-avatar"
-      })}
+      ${renderAvatar({ name: item.name, className: "attention-avatar" })}
       <span class="attention-copy">
         <strong>${escapeHtml(item.name)}</strong>
         <small>${escapeHtml(item.message)}</small>
