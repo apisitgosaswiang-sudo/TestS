@@ -1,0 +1,38 @@
+CLOB Patch-007 — Coach Security & Profile Photo
+
+ไฟล์ที่แก้ไข/เพิ่ม:
+- css/app.css
+- js/config.js
+- js/firebase.js
+- js/trainer-security.js (ใหม่)
+- js/views.js
+- js/trainer-profile.js
+- js/trainer-dashboard-page.js
+- js/trainer-settings-page.js
+- firebase/storage.rules
+- sw.js
+
+วิธีติดตั้ง:
+1. แตก ZIP แล้วนำไฟล์ทั้งหมดวางทับตามโครงสร้างเดิมของโปรเจกต์
+2. Deploy Firebase Storage Rules จากไฟล์ firebase/storage.rules
+3. Commit และ Deploy ขึ้น Vercel
+4. ปิดและเปิด CLOB ใหม่ หากยังเห็นเวอร์ชันเก่าให้รีเฟรชหนึ่งครั้ง
+
+สิ่งที่เพิ่ม:
+- Coach Login เป็น 2 ขั้นตอน: Coach ID 4 หลัก → Security PIN 6 หลัก
+- Coach Master: First / Coach ID 0409
+- PIN ตรวจสอบด้วย PBKDF2-SHA256 + Salt โดยไม่เก็บ PIN ตัวเลขตรง ๆ ใน JavaScript
+- กรอกผิด 5 ครั้ง ล็อก 15 นาที พร้อมใช้ Firebase state และ local fallback
+- Coach อัปโหลด ครอป และเปลี่ยนรูปโปรไฟล์ได้
+- รูปเก็บใน Firebase Storage: coaches/0409/profile/
+- ข้อมูล Coach เก็บใน Realtime Database: clob/coaches/0409
+- Dashboard โหลดรูปและข้อมูล Coach จาก Firebase พร้อม local cache
+- ไม่มีเมนูเปลี่ยน Coach PIN
+
+ส่วนที่ไม่เปลี่ยน:
+- Member Login และ Member PIN 6 หลัก
+- Workout / Programs / Packages / Nutrition
+- โครงสร้างข้อมูลสมาชิกเดิม
+
+หมายเหตุด้านความปลอดภัย:
+ระบบปัจจุบันใช้ Firebase Anonymous Authentication และตรวจ PIN ฝั่งเว็บตาม Architecture เดิม จึงเป็น Security Layer สำหรับช่วงทดสอบ ไม่ใช่ Server-side privileged authentication เต็มรูปแบบ

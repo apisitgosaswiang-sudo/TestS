@@ -1,4 +1,4 @@
-const CACHE_NAME = "clob-patch-006-reset-pin-fix";
+const CACHE_NAME = "clob-patch-007-coach-security-profile";
 
 const APP_SHELL = [
   "./",
@@ -37,6 +37,7 @@ const APP_SHELL = [
   "./js/image-processor.js",
   "./js/trainer.js",
   "./js/trainer-profile.js",
+  "./js/trainer-security.js",
   "./js/trainer-dashboard.js",
   "./js/trainer-dashboard-page.js",
   "./js/trainer-settings-page.js",
