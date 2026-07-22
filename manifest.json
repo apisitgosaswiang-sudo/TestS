@@ -15,5 +15,10 @@
     }
   ],
   "scope": "/",
-  "id": "/"
+  "id": "/",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait-primary"
 }

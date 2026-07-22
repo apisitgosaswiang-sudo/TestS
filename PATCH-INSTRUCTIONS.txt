@@ -1,21 +1,23 @@
-CLOB Patch-002 — Exercise Library Protection
+CLOB Patch-003 — App-like Screen
 
-วางทับไฟล์เดิม 3 ไฟล์:
-- js/exercise-library.js
-- js/exercise-library-page.js
+วางไฟล์ต่อไปนี้ทับไฟล์เดิม โดยรักษาตำแหน่งโฟลเดอร์:
+- index.html
+- css/app.css
+- js/app.js
+- manifest.json
 - sw.js
 
-สิ่งที่แก้:
-1. Core Library (22 ท่าพื้นฐาน) ถูกฝังในแอปและจะไม่ถูก Firebase/localStorage เขียนทับอีก
-2. ท่าที่ Trainer เพิ่มเองเก็บแยกเป็น Custom Library
-3. หน้า Library และตัวเลือกท่าใน Program จะแสดง Core + Custom รวมกัน
-4. Core exercise เป็น read-only: แก้ไขหรือลบไม่ได้
-5. Custom exercise เพิ่ม/แก้ไข/ลบได้ตามเดิม
-6. กู้ Custom exercise จาก cache เก่าโดยอัตโนมัติ และตัด built-in records ที่ซ้ำออก
-7. เปลี่ยน Service Worker cache เพื่อบังคับโหลดไฟล์เวอร์ชันใหม่
+สิ่งที่เปลี่ยน:
+- ปิด pinch zoom และ double-tap zoom
+- ป้องกัน iPhone ซูมอัตโนมัติเมื่อแตะช่องกรอกข้อมูล
+- ล็อก body และให้เลื่อนเฉพาะพื้นที่แอป
+- ลด Safari rubber-band / overscroll
+- เพิ่ม safe-area และ standalone PWA metadata
+- ปิด text selection และ tap highlight นอกช่องกรอกข้อมูล
+- เพิ่ม feedback ขนาดเล็กเมื่อกดปุ่ม
+- กำหนด PWA เป็นแนวตั้ง
 
-หลังอัปโหลด:
-- เปิดเว็บใน Private Tab หรือปิดแล้วเปิด Safari ใหม่
-- เข้า Trainer > Library
-- ควรเห็น Core exercises กลับมาพร้อม Side Plank ที่สร้างเอง
-- ลองเพิ่มท่าใหม่อีก 1 ท่า แล้ว Refresh; ทั้ง Core และ Custom ต้องยังอยู่
+หมายเหตุ:
+- แถบที่อยู่ Safari จะยังแสดงเมื่อเปิดจากลิงก์ปกติ ซึ่ง iOS ไม่อนุญาตให้เว็บซ่อนเอง
+- เพื่อให้เต็มจอเหมือนแอป ให้กด Share > Add to Home Screen แล้วเปิด CLOB จากไอคอนหน้า Home
+- หลังอัปเดต ให้ปิดแท็บเก่า เปิด Private Tab ทดสอบหนึ่งครั้ง หรือเปิดจาก Home Screen ใหม่ เพื่อให้ Service Worker โหลดไฟล์ล่าสุด
