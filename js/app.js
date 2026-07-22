@@ -143,3 +143,31 @@ if ("serviceWorker" in navigator) {
     });
   });
 }
+
+
+// Patch-003: prevent Safari page zoom while preserving normal vertical scrolling.
+function installAppLikeTouchGuards() {
+  const preventGesture = (event) => event.preventDefault();
+  document.addEventListener("gesturestart", preventGesture, { passive: false });
+  document.addEventListener("gesturechange", preventGesture, { passive: false });
+  document.addEventListener("gestureend", preventGesture, { passive: false });
+
+  let lastTouchEnd = 0;
+  document.addEventListener("touchend", (event) => {
+    const target = event.target;
+    if (target instanceof Element && target.closest("input, textarea, select, [contenteditable='true']")) {
+      lastTouchEnd = Date.now();
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) event.preventDefault();
+    lastTouchEnd = now;
+  }, { passive: false });
+
+  document.addEventListener("wheel", (event) => {
+    if (event.ctrlKey) event.preventDefault();
+  }, { passive: false });
+}
+
+installAppLikeTouchGuards();
