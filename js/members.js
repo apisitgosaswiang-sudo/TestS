@@ -79,6 +79,7 @@ function normalizeMembers(source, sessions) {
       packageRenewal: pkg.renewal || "manual",
       packageStatus: pkg.status || "active",
       packageFeatures: pkg.features || {},
+      security: member.security || null,
       workoutStatus: latestSession?.status || member.lastWorkoutStatus || "not_started",
       workoutTitle: latestSession?.title || member.lastWorkoutTitle || "ยังไม่มีโปรแกรม",
       workoutUpdatedAt: latestSession?.updatedAt || member.lastWorkoutUpdatedAt || 0

@@ -2,6 +2,7 @@ import { APP_CONFIG } from "./config.js";
 import { navigate } from "./router.js";
 import { loadMember, createWorkoutSession, getActiveWorkoutSession } from "./member.js";
 import { getFirebaseStatus } from "./firebase.js";
+import { getMemberSecurityState, createMemberPin, verifyMemberPin, formatLockTime } from "./member-security.js";
 
 const app = document.querySelector("#app");
 
@@ -106,19 +107,153 @@ export function renderLanding() {
   const button = document.querySelector("#member-login-button");
   const errorBox = document.querySelector("#member-error");
 
-  const submit = () => {
+  const showError = (message) => {
+    errorBox.hidden = false;
+    errorBox.className = "alert alert-error";
+    errorBox.textContent = message;
+  };
+
+  const closePinModal = () => document.querySelector("#member-pin-modal")?.remove();
+
+  const openPinModal = (code, state) => {
+    closePinModal();
+    const isSetup = !state.hasPin;
+    document.body.insertAdjacentHTML("beforeend", `
+      <div class="pin-modal-backdrop" id="member-pin-modal" role="dialog" aria-modal="true" aria-labelledby="pin-modal-title">
+        <section class="pin-modal-card">
+          <div class="pin-modal-header">
+            <div>
+              <p class="section-label">MEMBER SECURITY</p>
+              <h2 id="pin-modal-title">${isSetup ? "ตั้ง PIN ใหม่" : "ใส่ PIN"}</h2>
+            </div>
+            <button id="pin-modal-close" class="pin-close-button" type="button" aria-label="ปิด">×</button>
+          </div>
+          <p class="pin-modal-help">${isSetup ? "ตั้งรหัสตัวเลข 6 หลักสำหรับเข้าใช้งานครั้งถัดไป" : "กรอก PIN 6 หลักเพื่อยืนยันตัวตน"}</p>
+          <label class="field-label" for="member-pin">PIN 6 หลัก</label>
+          <input id="member-pin" class="input input-code" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
+          ${isSetup ? `
+            <label class="field-label" for="member-pin-confirm">ยืนยัน PIN อีกครั้ง</label>
+            <input id="member-pin-confirm" class="input input-code" type="password" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="••••••">
+          ` : ""}
+          <div id="pin-modal-error" class="alert alert-error" hidden></div>
+          <button id="pin-modal-submit" class="button button-primary" type="button">${isSetup ? "ตั้ง PIN และเข้าสู่ระบบ" : "เข้าสู่ระบบ"}</button>
+          ${isSetup ? "" : `<button id="forgot-pin" class="button button-text" type="button">ลืม PIN</button>`}
+        </section>
+      </div>
+    `);
+
+    const modal = document.querySelector("#member-pin-modal");
+    const pinInput = document.querySelector("#member-pin");
+    const confirmInput = document.querySelector("#member-pin-confirm");
+    const submitButton = document.querySelector("#pin-modal-submit");
+    const modalError = document.querySelector("#pin-modal-error");
+
+    const normalize = (element) => {
+      if (!element) return;
+      element.value = element.value.replace(/\D/g, "").slice(0, 6);
+      modalError.hidden = true;
+    };
+
+    pinInput.addEventListener("input", () => normalize(pinInput));
+    confirmInput?.addEventListener("input", () => normalize(confirmInput));
+    document.querySelector("#pin-modal-close").addEventListener("click", closePinModal);
+    modal.addEventListener("click", (event) => { if (event.target === modal) closePinModal(); });
+    document.querySelector("#forgot-pin")?.addEventListener("click", () => {
+      modalError.hidden = false;
+      modalError.textContent = "กรุณาติดต่อ Trainer เพื่อรีเซ็ต PIN";
+    });
+
+    const showModalError = (message) => {
+      modalError.hidden = false;
+      modalError.textContent = message;
+    };
+
+    const completeLogin = () => {
+      sessionStorage.setItem("clob_member_code", code);
+      closePinModal();
+      navigate("/member");
+    };
+
+    const submitPin = async () => {
+      const pin = pinInput.value;
+      if (!/^\d{6}$/.test(pin)) {
+        showModalError("กรุณากรอก PIN ให้ครบ 6 หลัก");
+        pinInput.focus();
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = "กำลังตรวจสอบ...";
+      try {
+        if (isSetup) {
+          if (pin !== confirmInput.value) throw new Error("PIN ทั้งสองช่องไม่ตรงกัน");
+          await createMemberPin(code, pin);
+          completeLogin();
+          return;
+        }
+
+        const result = await verifyMemberPin(code, pin, state.security);
+        if (result.ok) {
+          completeLogin();
+          return;
+        }
+
+        if (result.reason === "locked") {
+          showModalError(`ใส่ PIN ผิดหลายครั้ง ระบบถูกล็อกชั่วคราว กรุณาลองใหม่ใน ${formatLockTime(result.lockedUntil)}`);
+        } else {
+          const remaining = Number.isFinite(result.attemptsRemaining) ? ` เหลือ ${result.attemptsRemaining} ครั้ง` : "";
+          showModalError(`PIN ไม่ถูกต้อง${remaining}`);
+        }
+        pinInput.value = "";
+        pinInput.focus();
+      } catch (error) {
+        showModalError(error.message || "ไม่สามารถตรวจสอบ PIN ได้");
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = isSetup ? "ตั้ง PIN และเข้าสู่ระบบ" : "เข้าสู่ระบบ";
+      }
+    };
+
+    submitButton.addEventListener("click", submitPin);
+    [pinInput, confirmInput].filter(Boolean).forEach((element) => {
+      element.addEventListener("keydown", (event) => { if (event.key === "Enter") submitPin(); });
+    });
+    setTimeout(() => pinInput.focus(), 50);
+  };
+
+  const submit = async () => {
     const code = input.value.replace(/\D/g, "");
 
     if (code.length !== APP_CONFIG.memberCodeLength) {
-      errorBox.hidden = false;
-      errorBox.className = "alert alert-error";
-      errorBox.textContent = "กรุณากรอกรหัสสมาชิกให้ครบ 5 หลัก";
+      showError("กรุณากรอกรหัสสมาชิกให้ครบ 5 หลัก");
       input.focus();
       return;
     }
 
-    sessionStorage.setItem("clob_member_code", code);
-    navigate("/member");
+    if (!getFirebaseStatus().ready) {
+      showError("ยังไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่");
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "กำลังตรวจสอบ...";
+    try {
+      const state = await getMemberSecurityState(code);
+      if (!state.exists) {
+        showError("ไม่พบรหัสสมาชิกนี้ กรุณาตรวจสอบอีกครั้ง");
+        return;
+      }
+      if (state.lockedUntil > Date.now()) {
+        showError(`บัญชีถูกล็อกชั่วคราว กรุณาลองใหม่ใน ${formatLockTime(state.lockedUntil)}`);
+        return;
+      }
+      openPinModal(code, state);
+    } catch (error) {
+      showError(error.message || "ไม่สามารถตรวจสอบรหัสสมาชิกได้");
+    } finally {
+      button.disabled = false;
+      button.textContent = "เข้าสู่ระบบสมาชิก";
+    }
   };
 
   input.addEventListener("input", () => {

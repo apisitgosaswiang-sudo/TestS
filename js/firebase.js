@@ -13,7 +13,7 @@ export async function initializeFirebase() {
     const [
       { initializeApp },
       { getAuth, signInAnonymously },
-      { getDatabase, ref, get, set, update, push },
+      { getDatabase, ref, get, set, update, push, runTransaction },
       { getStorage, ref: storageRef, uploadBytesResumable, getDownloadURL, deleteObject }
     ] = await Promise.all([
       import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"),
@@ -28,7 +28,7 @@ export async function initializeFirebase() {
 
     authUser = credential.user;
     database = getDatabase(app);
-    dbApi = { ref, get, set, update, push };
+    dbApi = { ref, get, set, update, push, runTransaction };
     storage = getStorage(app);
     storageApi = { storageRef, uploadBytesResumable, getDownloadURL, deleteObject };
     firebaseReady = true;
@@ -89,6 +89,71 @@ export async function memberCodeExists(code) {
     return snapshot.exists();
   } catch (error) {
     console.warn("Could not check member code:", error);
+    return false;
+  }
+}
+
+
+export async function saveMemberSecurity(memberCode, security) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(dbApi.ref(database, `clob/members/${memberCode}/security`), security);
+    return true;
+  } catch (error) {
+    console.warn("Could not save member security:", error);
+    return false;
+  }
+}
+
+export async function registerMemberPinFailure(memberCode, options = {}) {
+  if (!firebaseReady || !database || !dbApi) return null;
+  const maxAttempts = Number(options.maxAttempts || 5);
+  const lockMs = Number(options.lockMs || 900000);
+  try {
+    const result = await dbApi.runTransaction(
+      dbApi.ref(database, `clob/members/${memberCode}/security`),
+      (current) => {
+        if (!current?.pinHash) return current;
+        const now = Date.now();
+        if (Number(current.lockedUntil || 0) > now) return current;
+        const failedAttempts = Number(current.failedAttempts || 0) + 1;
+        return {
+          ...current,
+          failedAttempts: failedAttempts >= maxAttempts ? 0 : failedAttempts,
+          lockedUntil: failedAttempts >= maxAttempts ? now + lockMs : 0,
+          lastFailedAt: now
+        };
+      }
+    );
+    return result.snapshot.val();
+  } catch (error) {
+    console.warn("Could not register PIN failure:", error);
+    return null;
+  }
+}
+
+export async function clearMemberPinFailures(memberCode) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.update(dbApi.ref(database, `clob/members/${memberCode}/security`), {
+      failedAttempts: 0,
+      lockedUntil: 0,
+      lastSuccessfulLoginAt: Date.now()
+    });
+    return true;
+  } catch (error) {
+    console.warn("Could not clear PIN failures:", error);
+    return false;
+  }
+}
+
+export async function resetMemberPinSecurity(memberCode) {
+  if (!firebaseReady || !database || !dbApi) return false;
+  try {
+    await dbApi.set(dbApi.ref(database, `clob/members/${memberCode}/security`), null);
+    return true;
+  } catch (error) {
+    console.warn("Could not reset member PIN:", error);
     return false;
   }
 }

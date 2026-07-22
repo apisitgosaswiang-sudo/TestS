@@ -310,6 +310,18 @@ export async function renderMemberDetail(code) {
       </section>
 
       <section class="detail-card card">
+        <div class="detail-card-title">
+          <div>
+            <h3>ความปลอดภัย</h3>
+            <p>${member.security?.pinHash ? "ตั้ง PIN แล้ว" : "ยังไม่ได้ตั้ง PIN"}</p>
+          </div>
+          <span class="package-chip ${member.security?.pinHash ? "package-active" : "package-expiring"}">${member.security?.pinHash ? "PIN READY" : "NO PIN"}</span>
+        </div>
+        <small>Trainer ไม่สามารถดู PIN เดิมได้ หากสมาชิกลืม PIN ให้รีเซ็ตเพื่อให้ตั้งใหม่ตอนเข้าสู่ระบบครั้งถัดไป</small>
+        <button id="reset-member-pin" class="button button-secondary" type="button" ${member.security?.pinHash ? "" : "disabled"}>รีเซ็ต PIN</button>
+      </section>
+
+      <section class="detail-card card">
         <h3>Workout ล่าสุด</h3>
         <div class="latest-workout-row">
           <div>
@@ -339,5 +351,21 @@ export async function renderMemberDetail(code) {
   document.querySelector("#history-tab")?.addEventListener("click", () => toast("Workout History แบบเต็มจะมาใน Pack 05 Part 2"));
   document.querySelector("#package-tab")?.addEventListener("click", () => navigate(`/member-package-${member.code}`));
   document.querySelector("#manage-package")?.addEventListener("click", () => navigate(`/member-package-${member.code}`));
+  document.querySelector("#reset-member-pin")?.addEventListener("click", async () => {
+    if (!window.confirm(`รีเซ็ต PIN ของ ${member.name} ใช่หรือไม่?`)) return;
+    const button = document.querySelector("#reset-member-pin");
+    button.disabled = true;
+    button.textContent = "กำลังรีเซ็ต...";
+    try {
+      await trainerResetMemberPin(member.code);
+      member.security = null;
+      toast("รีเซ็ต PIN แล้ว สมาชิกจะตั้ง PIN ใหม่เมื่อเข้าสู่ระบบครั้งถัดไป");
+      setTimeout(() => renderMemberDetail(member.code), 700);
+    } catch (error) {
+      toast(error.message || "รีเซ็ต PIN ไม่สำเร็จ");
+      button.disabled = false;
+      button.textContent = "รีเซ็ต PIN";
+    }
+  });
   document.querySelector("#view-history")?.addEventListener("click", () => toast("Workout History แบบเต็มจะมาใน Pack 05 Part 2"));
 }
