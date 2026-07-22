@@ -12,35 +12,11 @@
           ".read": "$uid === auth.uid",
           ".write": "$uid === auth.uid"
         }
-      },
-      "progress": {
-        "$memberCode": {
-          ".read": "auth != null",
-          ".write": "auth != null"
-        }
-      },
-      "onlineCoaching": {
-        "$memberCode": {
-          ".read": "auth != null",
-          ".write": "auth != null"
-        }
-      },
-      "v1": {
-        "memberExperience": {
-          "$memberCode": {
-            ".read": "auth != null",
-            ".write": "auth != null"
-          }
-        }
-      },
-      "systemBackups": {
-        ".read": "auth != null",
-        ".write": "auth != null"
-      },
-      "system": {
-        ".read": "auth != null",
-        ".write": "auth != null"
       }
+    },
+    "workoutTrackerData": {
+      ".read": "auth != null",
+      ".write": "auth != null"
     }
   }
 }
