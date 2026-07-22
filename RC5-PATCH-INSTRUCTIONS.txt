@@ -1,0 +1,21 @@
+CLOB RC5 — Package Management Patch
+
+ให้นำไฟล์ใน ZIP นี้ไปวางทับไฟล์เดิม โดยรักษาโครงสร้างโฟลเดอร์:
+- js/package-management.js
+- js/firebase.js
+- js/app.js
+- js/trainer-settings-page.js
+- js/member-management-page.js
+- css/components.css
+- sw.js
+
+หลัง deploy:
+1. เปิดเว็บใน Private/Incognito หรือ Hard Refresh หนึ่งครั้ง
+2. เข้า Trainer > Settings > Packages > จัดการ
+3. เพิ่มหรือแก้แพ็กเกจ แล้วบันทึก
+4. เข้า Member > Package และตรวจว่า dropdown แสดงเฉพาะแพ็กเกจ Active
+
+สถานะ:
+- Active: แสดงให้เลือกสมาชิกใหม่
+- Hidden: ไม่แสดงในหน้ามอบหมาย แต่ยังเก็บข้อมูลไว้
+- Archived: เก็บเป็นประวัติและไม่แสดงในหน้ามอบหมาย

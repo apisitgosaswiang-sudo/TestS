@@ -1,4 +1,4 @@
-const CACHE_NAME = "clob-rc4-stabilization";
+const CACHE_NAME = "clob-rc5-package-management";
 
 const APP_SHELL = [
   "./",
@@ -21,6 +21,7 @@ const APP_SHELL = [
   "./js/member-progress-page.js",
   "./js/member-weekly-update-page.js",
   "./js/member-management-page.js",
+  "./js/package-management.js",
   "./js/member-experience.js",
   "./js/workout.js",
   "./js/programs.js",
