@@ -1,0 +1,23 @@
+CLOB Patch-005 — Member PIN Security
+
+วางไฟล์ทั้งหมดใน ZIP ทับไฟล์เดิม โดยรักษาโครงสร้างโฟลเดอร์:
+- js/views.js
+- js/firebase.js
+- js/member-security.js (ไฟล์ใหม่)
+- js/members-page.js
+- js/members.js
+- css/components.css
+- sw.js
+
+หลังอัปขึ้น GitHub/Vercel:
+1) ปิด CLOB ที่เปิดจาก Home Screen ให้หมด
+2) เปิดใหม่ หรือเปิด Safari Private Tab หนึ่งครั้งเพื่อให้ Service Worker โหลดเวอร์ชันใหม่
+3) ทดสอบสมาชิกเดิม: ใส่รหัส 5 หลัก > ตั้ง PIN 6 หลัก 2 ครั้ง > เข้าระบบ
+4) Logout แล้วทดสอบ Login อีกครั้งด้วย PIN
+5) ทดสอบใส่ PIN ผิด 5 ครั้ง ระบบต้องล็อก 15 นาที
+6) Trainer > Member Detail > ความปลอดภัย > รีเซ็ต PIN
+
+ข้อมูลเดิมไม่ต้องย้าย ระบบเพิ่ม security ใต้สมาชิกเดิมเท่านั้น:
+clob/members/{memberCode}/security
+
+หมายเหตุ: Trainer จะดู PIN เดิมไม่ได้ ทำได้เฉพาะรีเซ็ต PIN เท่านั้น

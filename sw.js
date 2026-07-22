@@ -1,4 +1,4 @@
-const CACHE_NAME = "clob-patch-003-app-like-screen";
+const CACHE_NAME = "clob-patch-005-member-pin";
 
 const APP_SHELL = [
   "./",
