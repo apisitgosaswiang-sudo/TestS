@@ -1,17 +1,22 @@
-# CLOB Product Direction
+# Morning Warrior Product Direction
 
-> CLOB v2 product decisions are governed by:
+> `CLOB` is the master brand. `Morning Warrior` is the Trainer app and product
+> name under CLOB.
+>
+> Morning Warrior v2 product decisions are governed by:
 >
 > - `docs/CLOB-V2-PRODUCT-CONSTITUTION.md`
 > - `docs/CLOB-V2-ROADMAP.md`
 > - `docs/PRODUCT-DECISIONS.md`
 >
-> If this legacy roadmap conflicts with an approved CLOB v2 decision, the
-> CLOB v2 documents take precedence.
+> If this legacy roadmap conflicts with an approved Morning Warrior v2
+> decision, the Morning Warrior v2 documents take precedence. The filenames
+> above retain CLOB because it remains the master brand and technical namespace.
 
 ## Vision
 
-CLOB คือแพลตฟอร์มที่เชื่อม Trainer และ Member เข้าด้วยกัน
+Morning Warrior คือแอปสำหรับ Trainer ภายใต้แบรนด์หลัก CLOB
+ที่เชื่อม Trainer และ Member เข้าด้วยกัน
 
 > แอปที่ลูกเทรนอยากเปิดทุกวัน และทำให้เทรนเนอร์จัดการทุกอย่างได้จากที่เดียว
 
@@ -94,7 +99,7 @@ CLOB คือแพลตฟอร์มที่เชื่อม Trainer แ
 
 ## Pack 05 Part 1 Completed
 
-- Black CLOB Logo
+- Black Morning Warrior Logo
 - Members List
 - Search / Filter / Sort
 - Member Detail

@@ -1,4 +1,4 @@
-const CACHE_NAME = "clob-v2-patch-011f1-persistent-member-nav-v1";
+const CACHE_NAME = "morning-warrior-v2-nutrition-ai-beta-v2";
 
 const APP_SHELL = [
   "./",
@@ -9,6 +9,7 @@ const APP_SHELL = [
   "./css/components.css",
   "./css/app.css",
   "./css/design-system.css",
+  "./css/nutrition.css",
   "./js/app.js",
   "./js/config.js",
   "./js/coach-session.js",
@@ -22,6 +23,10 @@ const APP_SHELL = [
   "./js/member-today-page.js",
   "./js/dynamic-home.js",
   "./js/emotion-design.js",
+  "./js/nutrition.js",
+  "./js/nutrition-page.js",
+  "./js/ai-food-estimator.js",
+  "./js/trainer-nutrition-page.js",
   "./js/member-profile-page.js",
   "./js/member-progress-page.js",
   "./js/member-weekly-update-page.js",

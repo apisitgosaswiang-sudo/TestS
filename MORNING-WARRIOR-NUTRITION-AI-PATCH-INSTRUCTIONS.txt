@@ -1,0 +1,47 @@
+MORNING WARRIOR v2 — NUTRITION + AI FOOD ESTIMATION BETA
+Master brand: CLOB
+Base required: CLOB v2 Patch-011F1
+
+ไฟล์ ZIP นี้เป็นแพตช์แบบวางทับ โดยโครงสร้างภายในเริ่มจาก Root ของเว็บ
+เช่น index.html, sw.js, css/, js/, assets/ และ docs/
+
+วิธีติดตั้ง
+1. สำรองโฟลเดอร์ public ที่ใช้งานอยู่ก่อน
+2. ตรวจว่าระบบปัจจุบันมี Patch-011F1 แล้ว
+3. แตก ZIP และคัดลอกไฟล์ทั้งหมดไปที่ Root ของ public
+4. เลือก Replace/Overwrite เมื่อระบบถาม
+5. Publish/Deploy ตามวิธีเดิมของระบบ
+6. หลัง Publish ให้ปิด PWA แล้วเปิดใหม่ หรือ Hard Refresh 1 ครั้ง
+
+สิ่งที่รวมอยู่ในแพตช์
+- ชื่อแอป Morning Warrior พร้อมข้อความ by CLOB
+- Minimal + Energy / Quiet outside. Active inside.
+- Minimal Dynamic Home และ Next Best Action
+- เมนูสมาชิก 5 แท็บ: Home / Workout / Nutrition / Progress / Profile
+- Nutrition: Calories, Protein, Carbs, Fat และ Calories Remaining
+- เพิ่ม แก้ไข ลบอาหาร กรอกเอง Recent Foods และ Personal Food Library
+- เทรนเนอร์ตั้งเป้าหมาย ตรวจย้อนหลัง แก้อาหาร และส่ง Feedback
+- AI ประเมินอาหารจากรูป โดยสมาชิกตรวจแก้ก่อนยืนยันบันทึก
+- AI สูงสุด 3 ครั้ง/สมาชิก/วัน และ 60 ครั้ง/ทั้งระบบ/วัน
+- รูปเดิมใช้ Cache, การวิเคราะห์ที่ล้มเหลวคืนโควตา และไม่เก็บรูปถาวร
+
+สถานะ AI ก่อนตั้งค่า Firebase
+- ระบบ Nutrition แบบกรอกเองใช้งานได้ทันที
+- AI จะยังไม่ส่งรูปออกไป หาก appCheckSiteKey ใน js/config.js ยังว่าง
+- อ่าน docs/NUTRITION-AI-SETUP.md และตั้งค่า Firebase AI Logic + App Check
+- ใส่เฉพาะ Public reCAPTCHA Enterprise Site Key ใน js/config.js
+- ห้ามใส่ Gemini API key, reCAPTCHA secret หรือข้อมูลลับในไฟล์เว็บ
+
+ข้อมูลเดิม
+- Firebase root และ Storage/Session key ชื่อ clob ยังคงเดิม
+- แพตช์ไม่ย้ายหรือลบข้อมูล Programs, Packages, Workout, Progress หรือสมาชิกเดิม
+
+ตรวจหลังอัปโหลด
+1. Programs เปิดและบันทึกได้
+2. Trainer เพิ่ม Package และผูก Package ให้สมาชิกได้
+3. สมาชิกเห็นเมนู 5 แท็บและเข้า Nutrition ได้
+4. กรอกอาหารเองแล้ว Home อัปเดต Calories Remaining
+5. หากเปิด AI แล้ว ให้ทดสอบรูปเดิมว่าไม่หักโควตาซ้ำ
+6. ตรวจชื่อแอป Morning Warrior และข้อความ by CLOB
+
+รายงานการทดสอบก่อนส่งอยู่ที่ docs/MORNING-WARRIOR-DELIVERY-QA.md

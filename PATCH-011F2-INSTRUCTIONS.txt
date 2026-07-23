@@ -1,0 +1,27 @@
+CLOB v2 PATCH-011F2 — MINIMAL DYNAMIC HOME
+
+BASE REQUIRED
+-------------
+CLOB v2 Patch-011F1 must already be installed.
+
+INSTALL
+-------
+1. Extract the Patch-011F2 ZIP.
+2. Copy every included file into the same relative path in your CLOB project.
+3. Allow the listed files to replace their Patch-011F1 versions.
+4. Publish the project.
+5. Fully close and reopen the installed PWA once.
+
+FIRST CHECK
+-----------
+1. Login as a Member and open Home.
+2. Confirm the large priority card is light, not a dark full-card surface.
+3. Confirm the most important action remains obvious within three seconds.
+4. Confirm Home, Workout, Progress and Profile remain visible at the bottom.
+5. Confirm Success, Warning and Error use only small semantic accents.
+
+UNCHANGED
+---------
+Dynamic priority logic, Member Navigation, Check-in, Workout, Member Login/PIN,
+Coach Security, Programs, Packages, Firebase paths and Nutrition data remain
+unchanged.

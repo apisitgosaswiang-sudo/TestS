@@ -1,0 +1,51 @@
+# Morning Warrior v2 — Nutrition + AI Food Estimate Beta
+
+## Added
+
+- Member Nutrition page with daily date selection.
+- Daily Calories, Protein, Carbs and Fat totals.
+- Manual meal add, edit and soft delete.
+- Recent confirmed foods for quick reuse.
+- Trainer Calories and Protein targets with effective dates.
+- Trainer seven-day adherence, 14-day meal review, meal correction and feedback.
+- Member meal timeline displays trainer feedback against the reviewed meal.
+- Calories Remaining on Dynamic Home.
+- Five-tab member navigation: Home / Workout / Nutrition / Progress / Profile.
+- Firebase AI Logic food-photo estimation with editable structured output.
+- Client-side image compression and SHA-256 result cache.
+- AI quota transaction: 3 calls/member/day and 60 calls/project/day.
+- Failed AI analysis releases its reserved app quota.
+- Manual fallback for setup, App Check, quota, network and model errors.
+
+## Cost and privacy
+
+- No Cloud Functions.
+- No permanent meal-photo upload in this beta.
+- No Gemini API key in browser source.
+- No automatic AI calls on page load, photo selection, save or review.
+- App Check site key is required before a new AI request.
+
+## Data safety
+
+New data is additive under:
+
+- `clob/nutritionTargets`
+- `clob/nutritionLogs`
+- `clob/personalFoodLibrary`
+- `clob/nutritionFeedback`
+- `clob/aiFoodUsage`
+- `clob/aiFoodCache`
+
+Workout, Programs, Packages, Progress, Check-ins, Photos and security paths are
+not renamed, moved or deleted.
+
+## Brand migration
+
+- App product name is Morning Warrior under the CLOB master brand.
+- Browser title, install name, iOS title, visible wordmarks, icon and exported
+  member-data filename now use Morning Warrior.
+- Public endorsement copy uses `Morning Warrior by CLOB` where ownership needs
+  to be explicit.
+- Manifest `id`, Firebase root `clob`, local/session storage keys, browser event
+  names and CSS namespaces remain unchanged to preserve installed-app identity
+  and existing member data.
