@@ -11,7 +11,11 @@ const OWNER_CONFIG = {
     save: (ownerId, upload) => saveMemberProfilePhoto(ownerId, upload)
   },
   coach: {
-    storageRoot: "coaches",
+    // Compatibility path: current production Storage rules already permit
+    // authenticated uploads below /members/{memberId}/**. Keeping coach
+    // profile files in a reserved subfolder lets Coach and Member use the
+    // same proven upload flow without weakening rules or colliding with IDs.
+    storageRoot: "members/_coaches",
     save: (ownerId, upload) => saveCoachProfilePhoto(ownerId, upload)
   }
 };
@@ -41,7 +45,7 @@ function validateRequest({ ownerType, ownerId, blob }) {
 function storageErrorMessage(error) {
   const code = String(error?.code || "");
   if (code === "storage/unauthorized") {
-    return "Firebase Storage ไม่อนุญาตให้อัปโหลด กรุณา Deploy firebase/storage.rules ไปยังโปรเจกต์ online-trainer-c";
+    return "Firebase Storage ไม่อนุญาตให้อัปโหลด กรุณาตรวจ Firebase Authentication และ Storage Rules แล้วลองใหม่";
   }
   if (code === "storage/retry-limit-exceeded") {
     return "การอัปโหลดใช้เวลานานเกินไป กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่";
