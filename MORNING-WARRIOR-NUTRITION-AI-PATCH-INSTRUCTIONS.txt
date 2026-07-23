@@ -27,7 +27,8 @@ Base required: CLOB v2 Patch-011F1
 
 สถานะ AI ก่อนตั้งค่า Firebase
 - ระบบ Nutrition แบบกรอกเองใช้งานได้ทันที
-- AI จะยังไม่ส่งรูปออกไป หาก appCheckSiteKey ใน js/config.js ยังว่าง
+- Full Hotfix 2 ใส่ Public Site key ของ App Check ไว้แล้ว; ไม่ต้องเพิ่ม
+  reCAPTCHA script, TOKEN, USER_ACTION, endpoint หรือ API_KEY เอง
 - อ่าน docs/NUTRITION-AI-SETUP.md และตั้งค่า Firebase AI Logic + App Check
 - ใส่เฉพาะ Public reCAPTCHA Enterprise Site Key ใน js/config.js
 - ห้ามใส่ Gemini API key, reCAPTCHA secret หรือข้อมูลลับในไฟล์เว็บ

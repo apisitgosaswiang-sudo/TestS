@@ -1,4 +1,4 @@
-const CACHE_NAME = "morning-warrior-v2-nutrition-ai-beta-v2";
+const CACHE_NAME = "morning-warrior-v2-nutrition-ai-beta-hotfix-2";
 
 const APP_SHELL = [
   "./",

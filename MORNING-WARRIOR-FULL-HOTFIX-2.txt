@@ -1,0 +1,37 @@
+MORNING WARRIOR v2 — NUTRITION AI BETA — FULL HOTFIX 2
+Master brand: CLOB
+Build date: 23 July 2026
+
+This is a complete replacement build. It does not require Patch-011F1 to be
+installed first.
+
+Fixed in this build:
+- Restored the stable Programs and Packages implementation.
+- New members no longer receive an unintended default package.
+- Editing member information preserves an existing package.
+- Package assignment writes only the package fields.
+- Program and Package failures show an actionable error instead of silently
+  failing.
+- Profile-photo filenames preserve the processed image type.
+- Service Worker cache version was changed so installed PWAs load this hotfix.
+- Updated AI food analysis to the current no-billing-required
+  `gemini-3.5-flash-lite` model.
+- Added the registered reCAPTCHA Enterprise public site key for
+  `workout-tracker-ten-bay.vercel.app`.
+- Firebase App Check token auto-refresh is enabled in the app.
+- Service Worker cache was advanced to Hotfix 2 so an installed PWA receives
+  the App Check configuration.
+
+Install:
+1. Back up the current public folder.
+2. Replace the entire public root with all files and folders from this ZIP.
+3. Publish/deploy.
+4. Close the installed PWA completely, then reopen it. If using a browser,
+   perform one hard refresh.
+5. Test one AI food-photo analysis on the production domain.
+6. Review Firebase App Check request metrics. Enable enforcement for Firebase
+   AI Logic only after valid production requests appear.
+
+Firebase data remains under the existing clob paths. This build does not delete
+or migrate existing members, Programs, Packages, Workouts, Progress, or
+Nutrition records.
