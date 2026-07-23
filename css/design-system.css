@@ -793,7 +793,7 @@
   padding:
     max(22px, env(safe-area-inset-top))
     18px
-    max(34px, env(safe-area-inset-bottom));
+    calc(106px + env(safe-area-inset-bottom));
 }
 
 .clob-home-header,
@@ -1594,6 +1594,8 @@
   font-weight: 800;
 }
 
+.clob-member-bottom-nav,
+.clob-dynamic-home .bottom-nav,
 .clob-member-progress .bottom-nav {
   padding: 8px 12px max(8px, env(safe-area-inset-bottom));
   border-top-color: rgba(230, 227, 223, .88);
@@ -1602,10 +1604,14 @@
   -webkit-backdrop-filter: blur(18px);
 }
 
+.clob-member-bottom-nav .nav-item.is-active,
+.clob-dynamic-home .nav-item.is-active,
 .clob-member-progress .nav-item.is-active {
   color: var(--clob-ink);
 }
 
+.clob-member-bottom-nav .nav-item.is-active span,
+.clob-dynamic-home .nav-item.is-active span,
 .clob-member-progress .nav-item.is-active span {
   display: grid;
   width: 27px;
