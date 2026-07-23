@@ -9,10 +9,13 @@ coaching app that trainers use every day and members want to open every day.
 
 ## Product Core
 
-`Today's Mission` is the heart of CLOB.
+The daily coaching decision is the heart of CLOB.
 
 People do not open CLOB only to inspect information. They open it to understand
 what matters now, take action and complete today's mission.
+
+`Today's Mission` defines the action model. `Dynamic Home` presents the most
+important current action and reorders itself as the member's real state changes.
 
 Every module must connect back to at least one of:
 
@@ -92,6 +95,17 @@ Copy must be short, human and non-judgmental.
 - Do not use error colors to shame incomplete work.
 - Completion must come from the existing source of truth when possible.
 - When all missions are complete, show a restrained success response.
+
+## Dynamic Home Rules
+
+- Show one dominant `Next Best Action`.
+- Recalculate priority after meaningful completion.
+- Use Calories Remaining as the Nutrition hero only after real target and meal
+  data exist.
+- Do not display fake calories, meals or completion to fill a design.
+- Supporting cards may expose context, but they must not compete with the
+  current action.
+- When the required actions are complete, show a calm `Perfect Day` state.
 
 ## Interaction Model
 

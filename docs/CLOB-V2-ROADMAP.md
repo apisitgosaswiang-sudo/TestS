@@ -35,10 +35,10 @@ Implementation should be incremental:
 
 Reference implementation:
 
-- Patch-011R resets the unshipped first Patch-011 direction.
-- Member Today is the first reference screen.
-- Nutrition does not begin until the Product Owner accepts the reference
-  direction.
+- Patch-011F supersedes the unshipped Patch-011 and Patch-011R packages.
+- Dynamic Member Home and Member Progress are the first reference screens.
+- The Home priority engine is ready for real Nutrition data but does not invent
+  calories before the Nutrition layer exists.
 
 ## Phase B — Nutrition
 
@@ -59,6 +59,14 @@ All Nutrition UI must use D-001 components.
 
 Unify trends, streaks, personal records and small wins under the CLOB v2 design
 language.
+
+Foundation shipped in Patch-011F:
+
+- Member-owned Weight / Body Fat / Waist Check-in
+- optional body measurements and notes
+- edit the same day's Check-in without duplicates
+- Dynamic Home latest-weight card
+- photo sets counted separately from metric Check-ins
 
 ## Phase D — Coach Experience
 

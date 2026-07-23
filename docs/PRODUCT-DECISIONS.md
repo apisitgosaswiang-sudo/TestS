@@ -3,6 +3,32 @@
 This log records decisions that must remain consistent across chats and patches.
 The latest explicit Product Owner decision overrides an older conflicting one.
 
+## 2026-07-23 — Dynamic Home / Daily Coaching App
+
+- CLOB is evolving from a Workout App into a `Daily Coaching App`.
+- Member login opens one calm Home dashboard that answers: “What should I do
+  next?”
+- Home is dynamic, not a fixed list of equally weighted widgets.
+- The largest Home card is the current `Next Best Action`.
+- When real Nutrition data exists, Calories Remaining outranks consumed
+  calories and uses these states:
+  - more than 250 kcal remaining: normal
+  - 101–250 kcal remaining: near target
+  - 0–100 kcal remaining: critical
+  - below 0: show the amount over target
+- Nutrition UI must not appear before the Nutrition data layer provides real
+  targets and meal totals.
+- Before Nutrition ships, Workout, Weekly Check-in and Perfect Day use the same
+  dynamic priority engine.
+- Member Home does not show bottom navigation in this first Dynamic Home
+  reference. Workout, Progress and Profile remain reachable from the current
+  action, supporting cards and profile avatar.
+- `Today's Mission` remains the action model, while Dynamic Home becomes its
+  presentation layer. This supersedes the earlier rule that a fixed Mission
+  ring must always be the only Home hero.
+- Progress must let a member create and edit their own Check-in. A read-only
+  Member Progress summary is not acceptable.
+
 ## 2026-07-23 — CLOB v2 Product Direction
 
 - CLOB v2 vision: “The most beautiful coaching app for personal trainers.”
@@ -23,6 +49,7 @@ The latest explicit Product Owner decision overrides an older conflicting one.
 - The interface is quiet and neutral by default. Strong color is reserved for
   the next action, active progress and earned reward.
 - `Today's Mission` is the only visual hero on Member Today.
+- This fixed-hero rule is superseded by the later Dynamic Home decision above.
 - Workout, habits and navigation support the mission hierarchy instead of
   competing with it.
 - Member Today is the reference screen used to validate D-001 before Nutrition.
