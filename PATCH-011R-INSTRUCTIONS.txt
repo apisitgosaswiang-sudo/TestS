@@ -1,0 +1,20 @@
+CLOB v2 PATCH-011R — D-001 REDESIGN
+
+BASE REQUIRED
+-------------
+CLOB v2 Patch-010 must already be installed.
+
+INSTALL
+-------
+1. Extract the Patch-011R ZIP.
+2. Copy every included file into the same relative path in your CLOB project.
+3. Allow the listed files to replace their older versions.
+4. Do not replace or delete Firebase rules or database data.
+5. Publish the project.
+6. Close and reopen the installed PWA once.
+
+IMPORTANT
+---------
+- This package supersedes the unshipped first Patch-011 design package.
+- Do not install the old Patch-011 after Patch-011R.
+- Review docs/PATCH-011R-QA.md before approving the visual direction.

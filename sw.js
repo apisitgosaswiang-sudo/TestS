@@ -1,4 +1,4 @@
-const CACHE_NAME = "clob-v2-patch-010-coach-security-v1";
+const CACHE_NAME = "clob-v2-patch-011r-d001-redesign-v1";
 
 const APP_SHELL = [
   "./",
@@ -8,6 +8,7 @@ const APP_SHELL = [
   "./css/base.css",
   "./css/components.css",
   "./css/app.css",
+  "./css/design-system.css",
   "./js/app.js",
   "./js/config.js",
   "./js/coach-session.js",
@@ -19,6 +20,7 @@ const APP_SHELL = [
   "./js/members.js",
   "./js/members-page.js",
   "./js/member-today-page.js",
+  "./js/emotion-design.js",
   "./js/member-profile-page.js",
   "./js/member-progress-page.js",
   "./js/member-weekly-update-page.js",
