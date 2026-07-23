@@ -1,0 +1,25 @@
+CLOB PATCH-009 — Mobile Avatar + Workout Bottom Navigation
+
+ไฟล์ที่แก้:
+- css/app.css
+- sw.js
+
+แก้ไข:
+1) หน้า Today/Home บังคับกรอบรูปสมาชิกเป็นสัดส่วน 1:1 และวงกลมจริงทุกขนาดหน้าจอ
+2) รูปภายในใช้ object-fit: cover และจัดกึ่งกลาง
+3) เมนูด้านล่างของหน้า Workout เปลี่ยนจาก sticky เป็น fixed
+4) เมนู Workout ยึดขอบล่างของหน้าจอ พร้อมรองรับ iPhone safe area
+5) เพิ่มพื้นที่ด้านล่างของเนื้อหา ไม่ให้รายการหรือปุ่มถูกเมนูบัง
+6) เปลี่ยน Service Worker cache version เพื่อบังคับโหลด CSS ใหม่
+
+ติดตั้ง:
+1. วาง css/app.css และ sw.js ทับไฟล์เดิม
+2. Deploy Vercel
+3. ปิด CLOB จาก App Switcher แล้วเปิดใหม่
+4. หากยังเห็นหน้าเก่า ให้เปิดผ่าน Safari และ Refresh หนึ่งครั้ง
+
+ไม่กระทบ:
+- Login / PIN
+- Firebase
+- Workout data และ session
+- Profile photo upload

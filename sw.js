@@ -1,4 +1,4 @@
-const CACHE_NAME = "clob-patch-008-coach-upload-avatar-v1";
+const CACHE_NAME = "clob-patch-009-mobile-avatar-nav-v1";
 
 const APP_SHELL = [
   "./",
