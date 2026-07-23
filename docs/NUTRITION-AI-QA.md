@@ -44,7 +44,8 @@ the published Firebase/App Check environment and real devices are tested.
 - [ ] Member limit stops a fourth new image on the same day.
 - [ ] Project limit stops new analyses after 60 total requests.
 - [ ] No Gemini API key exists in browser source.
-- [ ] App Check is enforced before public testing.
+- [ ] A valid production request appears in App Check metrics before
+      enforcement is enabled for Firebase AI Logic.
 
 ## Trainer
 

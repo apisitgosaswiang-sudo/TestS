@@ -1,8 +1,8 @@
 # Morning Warrior Nutrition AI — One-time Firebase setup
 
-Status: Required before AI photo estimation can call Gemini  
+Status: App Check registered; production validation pending  
 Billing target: Firebase Spark, no Cloud Billing account, no payment method  
-Model: `gemini-2.5-flash-lite`
+Model: `gemini-3.5-flash-lite`
 
 The manual Nutrition system works without this setup. Until App Check is ready,
 the AI button stops before reserving quota and asks the member to enter the meal
@@ -29,21 +29,28 @@ Firebase AI Logic uses its proxy gateway to attach the Gemini API key on the
 backend. The Firebase web configuration key already present in `js/config.js`
 is not the Gemini API key.
 
-## 3. Configure App Check for the public web app
+## 3. App Check configuration for the public web app
 
-1. Open `Build` → `App Check`.
-2. Register the Morning Warrior web app with reCAPTCHA Enterprise.
-3. Add the real Morning Warrior production domain.
-4. Copy the public reCAPTCHA Enterprise site key.
-5. Put only that public site key into:
+Completed on 23 July 2026:
 
-```js
-// js/config.js
-appCheckSiteKey: "YOUR_RECAPTCHA_ENTERPRISE_SITE_KEY"
-```
+- Firebase web app: `online-trainer-web`
+- Provider: reCAPTCHA Enterprise, score-based
+- Production domain: `workout-tracker-ten-bay.vercel.app`
+- Token TTL: 1 hour
+- App status: Registered
+- The public site key is already configured in `js/config.js`.
 
-6. In the App Check `APIs` tab, confirm Firebase AI Logic is enforced.
-7. Keep replay protection disabled for the first small beta unless it is
+Do not add the standalone reCAPTCHA `<script>`, assessment endpoint, `TOKEN`,
+`USER_ACTION` or a server API key. Firebase App Check SDK handles the token
+flow automatically.
+
+After deploying this build:
+
+1. Test one AI food-photo analysis on the production domain.
+2. Open Firebase Console → App Check → request metrics.
+3. Confirm the production request appears as valid.
+4. Then enable enforcement for Firebase AI Logic.
+5. Keep replay protection disabled for the first small beta unless it is
    intentionally configured and tested.
 
 The site key is public configuration. Never place a reCAPTCHA secret or Gemini
@@ -114,7 +121,7 @@ The Gemini Developer API free tier may use submitted data to improve provider
 products. Do not use meal photos that contain faces, names, addresses, medical
 documents or other private information.
 
-## 8. Smoke test after setup
+## 8. Smoke test after deployment
 
 1. Log in as a member.
 2. Open Nutrition.

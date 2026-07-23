@@ -2,7 +2,7 @@
 
 วันที่ตรวจ: 23 กรกฎาคม 2026  
 ฐานเปรียบเทียบ: CLOB v2 Patch-011F1  
-ชุดส่งมอบ: Nutrition + AI Food Estimation Beta
+ชุดส่งมอบ: Nutrition + AI Food Estimation Beta · Full Hotfix 2
 
 ## ผลอัตโนมัติ
 
@@ -15,12 +15,17 @@
 - ผ่าน D-001 Design System regression
 - ผ่าน Full smoke test สำหรับ Programs, Packages, member add/edit, route 17 หน้า,
   Progress Check-in, Weekly Check-in และ Offline Programs fallback
+- ใส่ Public Site key ของ reCAPTCHA Enterprise ที่ลงทะเบียนกับ
+  `workout-tracker-ten-bay.vercel.app` แล้ว
+- Firebase App Check ใช้ Enterprise provider และเปิด Token auto-refresh
+- Service Worker cache เปลี่ยนเป็น Hotfix 2 เพื่อให้ PWA รับค่า App Check ใหม่
 
 ## สิ่งที่ยังต้องตรวจหลัง Publish
 
 - การเชื่อม Firebase production จริง
-- Firebase AI Logic และ App Check บนโดเมนจริง
-- การวิเคราะห์รูปอาหารจริงด้วย `gemini-2.5-flash-lite`
+- Firebase AI Logic request และ App Check token บนโดเมนจริง
+- การวิเคราะห์รูปอาหารจริงด้วย `gemini-3.5-flash-lite`
+- ตรวจ App Check metrics ให้มี Valid requests ก่อนเปิด Enforcement
 - การติดตั้ง/อัปเดต PWA บนอุปกรณ์จริง
 - Layout และ safe area บนโทรศัพท์จริงที่ใช้งาน
 
