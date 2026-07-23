@@ -1,4 +1,4 @@
-import { getAllMembers, getWorkoutSessions, saveMemberRecord, memberCodeExists, getFirebaseStatus } from "./firebase.js";
+import { getAllMembers, getWorkoutSessions, saveMemberRecord, memberCodeExists } from "./firebase.js";
 
 const DEMO_MEMBERS = {};
 
@@ -21,12 +21,11 @@ function saveLocalMember(code, payload) {
 
 export async function loadMembers() {
   const [remoteMembers, remoteSessions] = await Promise.all([getAllMembers(), getWorkoutSessions()]);
-  const { ready } = getFirebaseStatus();
-  if (ready) {
-    localStorage.setItem(LOCAL_MEMBERS_KEY, JSON.stringify(remoteMembers || {}));
-    return normalizeMembers(remoteMembers || {}, remoteSessions);
+  if (remoteMembers !== null) {
+    localStorage.setItem(LOCAL_MEMBERS_KEY, JSON.stringify(remoteMembers));
+    return normalizeMembers(remoteMembers, remoteSessions || {});
   }
-  return normalizeMembers(getLocalMembers(), remoteSessions);
+  return normalizeMembers(getLocalMembers(), remoteSessions || {});
 }
 
 export async function saveMember(member, { isNew = false } = {}) {
@@ -38,19 +37,51 @@ export async function saveMember(member, { isNew = false } = {}) {
     age: member.age === "" ? "-" : member.age, height: member.height === "" ? "-" : member.height,
     weight: member.weight === "" ? "-" : member.weight, goal: member.goal || "-", status: member.status || "active",
     joinedAt: member.joinedAt || new Date().toISOString().slice(0,10),
-    package: {
-      catalogId: member.package?.catalogId || "custom",
-      name: member.package?.name || "Online Coaching Monthly", startDate: member.package?.startDate || "", endDate: member.package?.endDate || "",
-      billingCycle: member.package?.billingCycle || "monthly", price: Number(member.package?.price || 0), renewal: member.package?.renewal || "manual",
-      status: member.package?.status || "active", features: member.package?.features || { program:true, weeklyCheckin:true, habitTracking:true, coachReview:true }
-    }, updatedAt: Date.now()
+    updatedAt: Date.now()
   };
+  if (member.package && typeof member.package === "object") {
+    payload.package = normalizePackagePayload(member.package);
+  }
   const savedRemotely = await saveMemberRecord(code, payload);
   if (!savedRemotely) {
     throw new Error("บันทึก Firebase ไม่สำเร็จ กรุณาตรวจอินเทอร์เน็ตและ Firebase Rules");
   }
   saveLocalMember(code, payload);
   return { code, ...payload };
+}
+
+export async function saveMemberPackage(memberCode, packageData) {
+  const code = String(memberCode || "").replace(/\D/g, "").slice(0, 5);
+  if (code.length !== 5) throw new Error("รหัสสมาชิกต้องมี 5 หลัก");
+  const payload = {
+    package: normalizePackagePayload(packageData),
+    updatedAt: Date.now()
+  };
+  const savedRemotely = await saveMemberRecord(code, payload);
+  if (!savedRemotely) {
+    throw new Error("บันทึก Firebase ไม่สำเร็จ กรุณาตรวจอินเทอร์เน็ต, Anonymous Authentication และ Firebase Rules");
+  }
+  saveLocalMember(code, payload);
+  return payload.package;
+}
+
+function normalizePackagePayload(packageData = {}) {
+  return {
+    catalogId: packageData.catalogId || "custom",
+    name: packageData.name || "Custom Package",
+    startDate: packageData.startDate || "",
+    endDate: packageData.endDate || "",
+    billingCycle: packageData.billingCycle || "monthly",
+    price: Number(packageData.price || 0),
+    renewal: packageData.renewal || "manual",
+    status: packageData.status || "active",
+    features: packageData.features || {
+      program: true,
+      weeklyCheckin: true,
+      habitTracking: true,
+      coachReview: true
+    }
+  };
 }
 
 function normalizeMembers(source, sessions) {
@@ -77,7 +108,7 @@ function normalizeMembers(source, sessions) {
       packagePrice: Number(pkg.price || 0),
       packageBillingCycle: pkg.billingCycle || "monthly",
       packageRenewal: pkg.renewal || "manual",
-      packageStatus: pkg.status || "active",
+      packageStatus: pkg.name ? (pkg.status || "active") : "unassigned",
       packageFeatures: pkg.features || {},
       profilePhoto: member.profilePhoto || "",
       profilePhotoPath: member.profilePhotoPath || "",

@@ -3,8 +3,7 @@ import {
   getPrograms,
   saveProgram as saveProgramRemote,
   deleteProgram as deleteProgramRemote,
-  assignProgramToMember,
-  getFirebaseStatus
+  assignProgramToMember
 } from "./firebase.js";
 
 const STORAGE_KEY = "clob_programs_v1";
@@ -52,10 +51,9 @@ export async function getExerciseLibrary() {
 
 export async function loadPrograms() {
   const remote = await getPrograms();
-  const { ready } = getFirebaseStatus();
 
-  if (ready) {
-    const normalizedRemote = normalizeProgramMap(remote || {});
+  if (remote !== null) {
+    const normalizedRemote = normalizeProgramMap(remote);
     saveProgramsLocal(normalizedRemote);
     return Object.values(normalizedRemote);
   }
@@ -126,10 +124,13 @@ export async function archiveProgram(program) {
 }
 
 export async function removeProgram(programId) {
+  const deletedRemotely = await deleteProgramRemote(programId);
+  if (!deletedRemotely) {
+    throw new Error("ลบ Program จาก Firebase ไม่สำเร็จ");
+  }
   const local = loadProgramsLocal();
   delete local[programId];
   saveProgramsLocal(local);
-  await deleteProgramRemote(programId);
 }
 
 export async function assignProgram(program, memberCode, effectiveDate) {

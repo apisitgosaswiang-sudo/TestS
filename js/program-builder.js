@@ -211,7 +211,15 @@ export async function renderProgramBuilder(programId) {
     return;
   }
 
-  if (!programsCache.length) programsCache = (await loadPrograms()).map((program) => normalizeProgram(program));
+  if (!programsCache.length) {
+    try {
+      programsCache = (await loadPrograms()).map((program) => normalizeProgram(program));
+    } catch (error) {
+      console.error("Program Builder failed to load:", error);
+      navigate("/programs");
+      return;
+    }
+  }
 
   currentProgram = programsCache.find((item) => item.id === programId);
   if (currentProgram) currentProgram = normalizeProgram(currentProgram);
@@ -403,20 +411,32 @@ function bindBuilder(activeDay) {
 
   document.querySelector("#save-program").addEventListener("click", async () => {
     syncMeta(activeDay);
-    await saveProgram(currentProgram);
-    showToast("บันทึก Program แล้ว");
+    try {
+      await saveProgram(currentProgram);
+      showToast("บันทึก Program แล้ว");
+    } catch (error) {
+      showToast(error.message || "บันทึก Program ไม่สำเร็จ");
+    }
   });
 
   document.querySelector("#assign-program").addEventListener("click", async () => {
     syncMeta(activeDay);
-    await saveProgram(currentProgram);
-    openAssignModal();
+    try {
+      await saveProgram(currentProgram);
+      openAssignModal();
+    } catch (error) {
+      showToast(error.message || "บันทึก Program ไม่สำเร็จ");
+    }
   });
 
   document.querySelector("#delete-program").addEventListener("click", async () => {
     if (!window.confirm(`ลบ ${currentProgram.name} หรือไม่?`)) return;
-    await removeProgram(currentProgram.id);
-    navigate("/programs");
+    try {
+      await removeProgram(currentProgram.id);
+      navigate("/programs");
+    } catch (error) {
+      showToast(error.message || "ลบ Program ไม่สำเร็จ");
+    }
   });
 }
 
@@ -515,9 +535,9 @@ async function openAssignModal() {
       <label class="assign-field">
         <span>Member</span>
         <select id="assign-member">
-          ${members.map((member) =>
+          ${members.length ? members.map((member) =>
             `<option value="${member.code}">${escapeHtml(member.name)} · ${member.code}</option>`
-          ).join("")}
+          ).join("") : '<option value="">ยังไม่มีสมาชิก</option>'}
         </select>
       </label>
 
@@ -526,7 +546,7 @@ async function openAssignModal() {
         <input id="assign-date" type="date" value="${today}" />
       </label>
 
-      <button id="confirm-assign" class="button button-primary">Assign Program</button>
+      <button id="confirm-assign" class="button button-primary" ${members.length ? "" : "disabled"}>Assign Program</button>
     </div>
   `;
 
@@ -537,8 +557,13 @@ async function openAssignModal() {
   document.querySelector("#confirm-assign").addEventListener("click", async () => {
     const memberCode = document.querySelector("#assign-member").value;
     const effectiveDate = document.querySelector("#assign-date").value;
-    await assignProgram(currentProgram, memberCode, effectiveDate);
-    modal.hidden = true;
-    showToast("Assign Program ให้สมาชิกแล้ว");
+    if (!memberCode) return;
+    try {
+      await assignProgram(currentProgram, memberCode, effectiveDate);
+      modal.hidden = true;
+      showToast("Assign Program ให้สมาชิกแล้ว");
+    } catch (error) {
+      showToast(error.message || "Assign Program ไม่สำเร็จ");
+    }
   });
 }

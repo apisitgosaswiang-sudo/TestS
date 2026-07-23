@@ -53,6 +53,12 @@ function storageErrorMessage(error) {
   return error?.message || "อัปโหลดรูปโปรไฟล์ไม่สำเร็จ";
 }
 
+function imageExtension(blob) {
+  if (blob.type === "image/jpeg") return "jpg";
+  if (blob.type === "image/png") return "png";
+  return "webp";
+}
+
 export async function uploadProfilePhoto({
   ownerType,
   ownerId,
@@ -66,7 +72,7 @@ export async function uploadProfilePhoto({
     throw new Error("Firebase Authentication ยังไม่พร้อม กรุณาปิดและเปิดแอปใหม่แล้วลองอีกครั้ง");
   }
 
-  const path = `${config.storageRoot}/${id}/profile/profile_${Date.now()}.webp`;
+  const path = `${config.storageRoot}/${id}/profile/profile_${Date.now()}.${imageExtension(blob)}`;
 
   try {
     const upload = await uploadImage(path, blob, onProgress);

@@ -3,6 +3,7 @@ import { getPackages, savePackageRecord } from "./firebase.js";
 import { escapeHtml } from "./utils.js";
 
 const app = document.querySelector("#app");
+const PACKAGE_CACHE_KEY = "clob_packages_cache_v1";
 
 export const DEFAULT_PACKAGE_CATALOG = [
   {
@@ -57,10 +58,25 @@ function normalizePackage(id, value = {}) {
 
 export async function loadPackageCatalog({ includeInactive = true } = {}) {
   const remote = await getPackages();
+  const customPackages = remote !== null ? remote : loadPackageCache();
+  if (remote !== null) savePackageCache(remote);
   const merged = new Map(DEFAULT_PACKAGE_CATALOG.map((item) => [item.id, normalizePackage(item.id, item)]));
-  Object.entries(remote || {}).forEach(([id, value]) => merged.set(id, normalizePackage(id, value)));
+  Object.entries(customPackages).forEach(([id, value]) => merged.set(id, normalizePackage(id, value)));
   const list = [...merged.values()].sort((a, b) => a.name.localeCompare(b.name));
   return includeInactive ? list : list.filter((item) => item.status === "active");
+}
+
+function loadPackageCache() {
+  try {
+    const value = JSON.parse(localStorage.getItem(PACKAGE_CACHE_KEY) || "{}");
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  } catch {
+    return {};
+  }
+}
+
+function savePackageCache(value) {
+  localStorage.setItem(PACKAGE_CACHE_KEY, JSON.stringify(value || {}));
 }
 
 function packageIdFromName(name) {
@@ -182,7 +198,7 @@ function renderEditor(pkg) {
     button.disabled = true;
     button.textContent = "กำลังบันทึก...";
 
-    const saved = await savePackageRecord(id, {
+    const payload = {
       name,
       price: Number(data.get("price") || 0),
       months: Math.max(1, Number(data.get("months") || 1)),
@@ -191,7 +207,8 @@ function renderEditor(pkg) {
       status: data.get("status"),
       features: String(data.get("features") || "").split("\n").map((item) => item.trim()).filter(Boolean),
       updatedAt: Date.now()
-    });
+    };
+    const saved = await savePackageRecord(id, payload);
 
     if (!saved) {
       button.disabled = false;
@@ -200,9 +217,14 @@ function renderEditor(pkg) {
       return;
     }
 
+    const cache = loadPackageCache();
+    cache[id] = payload;
+    savePackageCache(cache);
     close();
     showPackageToast("บันทึกแพ็กเกจแล้ว");
-    setTimeout(() => renderPackageManagement(), 350);
+    setTimeout(() => {
+      if (window.location.hash === "#/packages") renderPackageManagement();
+    }, 350);
   });
 }
 

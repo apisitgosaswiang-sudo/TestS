@@ -1,17 +1,17 @@
 export const APP_CONFIG = {
   appName: "Morning Warrior",
   parentBrand: "CLOB",
-  version: "Morning Warrior v2 · Nutrition AI Beta",
+  version: "Morning Warrior v2 · Nutrition AI Beta · Hotfix 2",
   coachId: "0409",
   coachPinLength: 6,
   memberCodeLength: 5,
   defaultRestSeconds: 90,
   aiFoodEstimationEnabled: true,
-  aiFoodModel: "gemini-2.5-flash-lite",
+  aiFoodModel: "gemini-3.5-flash-lite",
   aiFoodDailyLimitPerMember: 3,
   aiFoodDailyLimitProject: 60,
   aiRequireAppCheck: true,
-  appCheckSiteKey: ""
+  appCheckSiteKey: "6LdTyWEtAAAAAK0SiSUdSOyIuJ0h7n-36KPVlyp4"
 };
 
 export const firebaseConfig = {
