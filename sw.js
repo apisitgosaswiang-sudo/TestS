@@ -1,4 +1,4 @@
-const CACHE_NAME = "clob-v2-patch-011f-dynamic-home-progress-v1";
+const CACHE_NAME = "clob-v2-patch-011f1-persistent-member-nav-v1";
 
 const APP_SHELL = [
   "./",

@@ -7,7 +7,8 @@
 - Replaces the fixed Member Today dashboard with Dynamic Home.
 - Selects one real `Next Best Action` from Workout and Daily Mission state.
 - Adds the `Perfect Day` completion state.
-- Removes bottom navigation from Member Home to reduce first-login clutter.
+- Keeps Member Home visually calm while retaining fixed bottom navigation for
+  reliable orientation across Home, Workout, Progress and Profile.
 - Adds latest Weight, Water and Sleep supporting cards.
 - Implements Calories Remaining priority and warning logic without showing
   Nutrition UI before real Nutrition data exists.

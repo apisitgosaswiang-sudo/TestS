@@ -1,0 +1,27 @@
+CLOB v2 PATCH-011F1 — PERSISTENT MEMBER NAVIGATION
+
+BASE REQUIRED
+-------------
+CLOB v2 Patch-011F must already be installed.
+
+INSTALL
+-------
+1. Extract the Patch-011F1 ZIP.
+2. Copy every included file into the same relative path in your CLOB project.
+3. Allow the listed files to replace their Patch-011F versions.
+4. Publish the project.
+5. Fully close and reopen the installed PWA once.
+
+FIRST CHECK
+-----------
+1. Login as a Member.
+2. Confirm Home shows Home, Workout, Progress and Profile at the bottom.
+3. Open each tab and return to Home.
+4. Confirm the navigation remains visible and Home is active.
+5. Confirm the last Home content is not covered by the navigation or iPhone
+   home indicator.
+
+UNCHANGED
+---------
+Member Login/PIN, Coach Security, Programs, Packages, Firebase paths and
+Nutrition data remain unchanged.
