@@ -12,8 +12,9 @@ App-facing surfaces:
 - Member data-export product label and filename
 - Current product, Nutrition and QA documentation
 
-Use **Morning Warrior by CLOB** where the relationship or ownership should be
-explicit, while keeping **Morning Warrior** as the primary app name.
+Use **Morning Warrior** by itself in every visible logo lockup. Do not add a
+`by CLOB` endorsement beneath the product name. CLOB remains the internal master
+brand and technical namespace.
 
 The following CLOB identifiers intentionally remain unchanged:
 

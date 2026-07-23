@@ -2,11 +2,11 @@
 
 วันที่ตรวจ: 23 กรกฎาคม 2026  
 ฐานเปรียบเทียบ: CLOB v2 Patch-011F1  
-ชุดส่งมอบ: Nutrition + AI Food Estimation Beta · Full Hotfix 2
+ชุดส่งมอบ: Nutrition + AI Food Estimation Beta · Full Hotfix 4
 
 ## ผลอัตโนมัติ
 
-- ผ่าน Brand architecture: Morning Warrior เป็นชื่อแอป, CLOB เป็น Master Brand
+- ผ่าน Branding: โลโก้แสดง Morning Warrior ขนาดใหญ่ขึ้นและไม่มีข้อความ by CLOB
 - ผ่าน Nutrition data: target, local fallback, pending sync, edit same record และ soft delete
 - ผ่าน Nutrition + AI UI: เมนู 5 แท็บ, manual logging, trainer review และไม่มี AI call อัตโนมัติ
 - ผ่าน AI quota: 3 ครั้งต่อสมาชิก, 60 ครั้งต่อระบบ, cache ไม่หักซ้ำ และคืนโควตาเมื่อวิเคราะห์ล้มเหลว
@@ -17,8 +17,12 @@
   Progress Check-in, Weekly Check-in และ Offline Programs fallback
 - ใส่ Public Site key ของ reCAPTCHA Enterprise ที่ลงทะเบียนกับ
   `workout-tracker-ten-bay.vercel.app` แล้ว
-- Firebase App Check ใช้ Enterprise provider และเปิด Token auto-refresh
-- Service Worker cache เปลี่ยนเป็น Hotfix 2 เพื่อให้ PWA รับค่า App Check ใหม่
+- Firebase App Check เริ่มก่อน Auth, Database, Storage และ AI พร้อมตรวจ Token
+  ก่อนจองโควตา
+- ผ่าน App Check runtime test: ลำดับ initialization ถูกต้องและรับ Token ได้
+  ก่อนเริ่ม AI flow
+- Service Worker cache เปลี่ยนเป็น Hotfix 4, JavaScript/CSS/JSON ใช้
+  Network-first และ PWA รีโหลดหนึ่งครั้งเมื่อ worker ใหม่เข้าควบคุม
 
 ## สิ่งที่ยังต้องตรวจหลัง Publish
 

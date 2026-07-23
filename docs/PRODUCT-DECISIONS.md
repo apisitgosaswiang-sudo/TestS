@@ -8,7 +8,8 @@ The latest explicit Product Owner decision overrides an older conflicting one.
 - `CLOB` remains the master brand.
 - `Morning Warrior` is the product and app name for the Trainer online system.
 - App-facing surfaces use `Morning Warrior`.
-- Ownership or endorsement surfaces may use `Morning Warrior by CLOB`.
+- The visible logo lockup uses `Morning Warrior` only, without `by CLOB`, and
+  the product name is displayed at a larger size.
 - Existing `clob` technical identifiers remain stable for compatibility and
   also continue to reflect the master brand.
 

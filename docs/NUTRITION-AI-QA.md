@@ -7,7 +7,7 @@ the published Firebase/App Check environment and real devices are tested.
 ## Brand
 
 - [ ] The landing page, login, loading screens and trainer entry display
-      `Morning Warrior` as the app name and `by CLOB` as the endorsement.
+      the larger `Morning Warrior` app name without a `by CLOB` endorsement.
 - [ ] Browser title, install name and iOS Home Screen title display
       `Morning Warrior`.
 - [ ] The installed icon uses the Morning Warrior mark rather than the former
