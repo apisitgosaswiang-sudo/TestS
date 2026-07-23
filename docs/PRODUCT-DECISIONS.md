@@ -20,9 +20,9 @@ The latest explicit Product Owner decision overrides an older conflicting one.
   targets and meal totals.
 - Before Nutrition ships, Workout, Weekly Check-in and Perfect Day use the same
   dynamic priority engine.
-- Member Home does not show bottom navigation in this first Dynamic Home
-  reference. Workout, Progress and Profile remain reachable from the current
-  action, supporting cards and profile avatar.
+- Member Home remains visually calm, but the Member bottom navigation stays
+  fixed on Home, Workout, Progress and Profile. Real-device use showed that
+  removing it made primary destinations feel lost after returning Home.
 - `Today's Mission` remains the action model, while Dynamic Home becomes its
   presentation layer. This supersedes the earlier rule that a fixed Mission
   ring must always be the only Home hero.

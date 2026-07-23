@@ -58,7 +58,9 @@ member to interpret a dashboard or scan navigation.
 - A generic mission can be completed directly.
 - When all required missions are complete, show `Perfect Day`.
 - If there is no mission, show recovery language without manufacturing work.
-- Member Home omits bottom navigation in this reference version.
+- Member bottom navigation remains fixed on every top-level Member screen.
+  Dynamic Home stays calm by keeping only one dominant content action; stable
+  navigation is orientation, not a competing dashboard action.
 
 ## Calories Remaining states
 

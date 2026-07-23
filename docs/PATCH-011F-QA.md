@@ -12,7 +12,9 @@
 
 - [ ] Member login opens Home directly.
 - [ ] Greeting and member name appear immediately.
-- [ ] Bottom navigation is not shown on Home.
+- [ ] Bottom navigation remains fixed on Home and respects the iPhone safe area.
+- [ ] Home is active and opens Home after navigating to another Member tab.
+- [ ] Workout, Progress and Profile are reachable directly from Home.
 - [ ] An unstarted Workout is the largest card.
 - [ ] Start Workout opens the existing Workout flow.
 - [ ] An in-progress Workout shows `IN PROGRESS` and resumes.
@@ -42,6 +44,7 @@
 
 - [ ] Test at 320, 375, 390 and 430 px widths.
 - [ ] No horizontal scroll appears.
+- [ ] Page content is not hidden behind the fixed bottom navigation.
 - [ ] Primary action is visible without searching.
 - [ ] The Check-in sheet remains usable with the keyboard open.
 - [ ] Inputs use a decimal-friendly mobile keyboard.
