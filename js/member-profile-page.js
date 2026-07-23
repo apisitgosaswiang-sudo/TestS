@@ -56,11 +56,26 @@ export async function renderMemberProfilePage() {
 
         <button id="member-logout" class="button button-secondary">ออกจากระบบ</button>
       </div>
+      <nav class="bottom-nav clob-member-bottom-nav" aria-label="เมนูสมาชิก">
+        <button class="nav-item" data-member-nav="home"><span>⌂</span><small>Home</small></button>
+        <button class="nav-item" data-member-nav="workout"><span>✦</span><small>Workout</small></button>
+        <button class="nav-item" data-member-nav="progress"><span>↗</span><small>Progress</small></button>
+        <button class="nav-item is-active" data-member-nav="profile" aria-current="page"><span>○</span><small>Profile</small></button>
+      </nav>
     </main>
   `;
 
   document.querySelector("#profile-back").addEventListener("click", () => navigate("/member"));
   document.querySelector("#change-profile-photo").addEventListener("click", () => navigate(`/progress-photos-${code}`));
+  document.querySelectorAll("[data-member-nav]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.memberNav;
+      if (target === "home") navigate("/member");
+      if (target === "workout") navigate("/workout");
+      if (target === "progress") navigate(`/member-progress-${code}`);
+      if (target === "profile") navigate("/member-profile");
+    });
+  });
   document.querySelector("#member-logout").addEventListener("click", () => {
     sessionStorage.removeItem("clob_member_code");
     navigate("/");

@@ -121,6 +121,7 @@ function render() {
 
         <div id="member-toast" class="toast" role="status" hidden></div>
       </div>
+      ${memberBottomNavMarkup()}
     </main>
   `;
 
@@ -314,6 +315,16 @@ function bind() {
     });
   });
 
+  document.querySelectorAll("[data-member-nav]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.memberNav;
+      if (target === "home") navigate("/member");
+      if (target === "workout") openWorkout();
+      if (target === "progress") navigate(`/member-progress-${code}`);
+      if (target === "profile") navigate("/member-profile");
+    });
+  });
+
   document.querySelectorAll("[data-habit-plus], [data-habit-minus]").forEach((button) => {
     button.addEventListener("click", async () => {
       const habitId = button.dataset.habitPlus || button.dataset.habitMinus;
@@ -337,6 +348,29 @@ function getGreeting(date = new Date()) {
   if (hour < 12) return "Good Morning";
   if (hour < 18) return "Good Afternoon";
   return "Good Evening";
+}
+
+function memberBottomNavMarkup() {
+  return `
+    <nav class="bottom-nav clob-member-bottom-nav" aria-label="เมนูสมาชิก">
+      <button class="nav-item is-active" data-member-nav="home" aria-current="page">
+        <span>⌂</span>
+        <small>Home</small>
+      </button>
+      <button class="nav-item" data-member-nav="workout">
+        <span>✦</span>
+        <small>Workout</small>
+      </button>
+      <button class="nav-item" data-member-nav="progress">
+        <span>↗</span>
+        <small>Progress</small>
+      </button>
+      <button class="nav-item" data-member-nav="profile">
+        <span>○</span>
+        <small>Profile</small>
+      </button>
+    </nav>
+  `;
 }
 
 function toast(message) {

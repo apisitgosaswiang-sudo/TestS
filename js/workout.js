@@ -108,7 +108,7 @@ export async function renderWorkoutOverview() {
       <button id="finish-workout-button" class="button ${progress === 100 ? "button-primary" : "button-secondary"} finish-workout-button">
         ${progress === 100 ? "Finish Workout" : "บันทึกและกลับภายหลัง"}
       </button>
-      <nav class="bottom-nav member-workout-nav"><button class="nav-item" data-member-route="/member"><span>⌂</span><small>Today</small></button><button class="nav-item is-active" data-member-route="/workout"><span>✦</span><small>Workout</small></button><button class="nav-item" data-member-progress><span>↗</span><small>Progress</small></button><button class="nav-item" data-member-route="/member-profile"><span>○</span><small>Profile</small></button></nav>
+      <nav class="bottom-nav member-workout-nav"><button class="nav-item" data-member-route="/member"><span>⌂</span><small>Home</small></button><button class="nav-item is-active" data-member-route="/workout"><span>✦</span><small>Workout</small></button><button class="nav-item" data-member-progress><span>↗</span><small>Progress</small></button><button class="nav-item" data-member-route="/member-profile"><span>○</span><small>Profile</small></button></nav>
     </div>
   `, "workout-page");
 
@@ -236,7 +236,7 @@ export async function renderExerciseTracker(exerciseIndex) {
 
       <div id="workout-toast" class="toast" hidden></div>
 
-      <nav class="bottom-nav member-workout-nav"><button class="nav-item" data-member-route="/member"><span>⌂</span><small>Today</small></button><button class="nav-item is-active" data-member-route="/workout"><span>✦</span><small>Workout</small></button><button class="nav-item" data-member-progress><span>↗</span><small>Progress</small></button><button class="nav-item" data-member-route="/member-profile"><span>○</span><small>Profile</small></button></nav>
+      <nav class="bottom-nav member-workout-nav"><button class="nav-item" data-member-route="/member"><span>⌂</span><small>Home</small></button><button class="nav-item is-active" data-member-route="/workout"><span>✦</span><small>Workout</small></button><button class="nav-item" data-member-progress><span>↗</span><small>Progress</small></button><button class="nav-item" data-member-route="/member-profile"><span>○</span><small>Profile</small></button></nav>
       <div id="rest-timer" class="rest-timer" hidden>
         <div class="rest-timer-card">
           <p>REST TIMER</p>
