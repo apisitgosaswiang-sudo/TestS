@@ -1,4 +1,4 @@
-# CLOB Nutrition Module v1.0
+# Morning Warrior Nutrition Module v1.0
 
 Status: Approved design baseline  
 Patch: N-001 (Design only — no production code)  
@@ -6,7 +6,7 @@ Architecture: HTML/CSS/JavaScript + Firebase Realtime Database + Firebase Storag
 
 ## 1. Product goal
 
-CLOB Nutrition helps the member answer one question immediately:
+Morning Warrior Nutrition helps the member answer one question immediately:
 
 > วันนี้ยังทานได้อีกเท่าไร?
 
@@ -14,7 +14,7 @@ It helps the trainer answer:
 
 > ลูกเทรนทำตามเป้าหมายโภชนาการได้สม่ำเสมอแค่ไหน?
 
-CLOB is not intended to become a full food encyclopedia or a MyFitnessPal clone. The system stores only foods and meals actually used by members.
+Morning Warrior is not intended to become a full food encyclopedia or a MyFitnessPal clone. The system stores only foods and meals actually used by members.
 
 ## 2. Core UX rules
 
@@ -156,8 +156,8 @@ Primary action:
 
 ```text
 Choose or take photo
-→ Upload compressed image
-→ Server-side AI estimation
+→ Compress image in browser
+→ Firebase AI Logic estimation through its protected proxy
 → Member reviews result
 → Member confirms final values
 → Save meal
@@ -303,34 +303,35 @@ clob/nutritionFeedback/{memberCode}/{date}/{feedbackId}
 }
 ```
 
-## 9. Firebase Storage
+## 9. Meal photos
 
-Meal images:
-
-```text
-nutrition/{memberCode}/{date}/{mealId}.webp
-```
+The initial 10–20 member beta does not store meal photos permanently.
 
 Image rules:
 
-- Compress on the client before upload.
-- Recommended long edge: 1280 px maximum.
-- Recommended target size: approximately 150–350 KB.
-- Save both download URL and storage path.
-- Deleting a meal does not need to immediately delete the image in v1; cleanup can be a later scheduled process.
+- Compress on the client before sending to AI.
+- Maximum long edge: 1024 px.
+- Prefer WebP at quality 0.72, with JPEG fallback.
+- Keep the preview only for the current add-meal flow.
+- Save only a SHA-256 fingerprint with the confirmed meal.
+- Do not save a meal image URL or Storage path in this beta.
 
 ## 10. AI architecture
 
-The browser must not contain an AI provider secret.
+The browser must not contain a Gemini API key.
 
 ```text
 PWA
-→ protected server endpoint / Firebase callable function
+→ Firebase AI Logic web SDK
+→ Firebase AI Logic proxy + App Check
 → AI vision provider
 → normalized JSON response
 → member confirms
 → Firebase save
 ```
+
+The project remains on Firebase Spark and uses Gemini Developer API free tier.
+Cloud Functions and Vertex AI Gemini API are not used.
 
 Expected normalized AI response:
 
@@ -352,6 +353,19 @@ Fallbacks:
 - Low confidence → show `ค่าประมาณ กรุณาตรวจสอบ`.
 - Invalid response → do not save; preserve photo and allow manual values.
 - Slow network → show upload/analysis progress and allow retry.
+
+Cost guardrails:
+
+- Selecting or compressing a photo does not call AI.
+- The member must press `วิเคราะห์ด้วย AI`.
+- One request returns Calories, Protein, Carbs and Fat together.
+- The exact same compressed-image fingerprint returns a cached estimate.
+- Maximum 3 new analyses per member per calendar day.
+- Maximum 60 new analyses for the whole project per calendar day.
+- Reanalysis requires confirmation and consumes another quota.
+- When quota is unavailable, manual entry remains available.
+- Home, trainer review, editing and saving never call AI.
+- App Check configuration is required before a new request can reserve quota.
 
 ## 11. Trainer screen design
 
@@ -467,19 +481,21 @@ v1 decisions:
 ### N-006 — Photo upload
 
 - Client image compression.
-- Firebase Storage upload.
-- Meal photo preview.
+- Local meal photo preview.
+- No permanent photo upload in the zero-cost beta.
 
 ### N-007 — AI estimation
 
-- Protected server-side endpoint.
+- Firebase AI Logic with App Check and the Gemini Developer API Free Tier.
 - AI review and confirmation screen.
+- Two requests per member per day and 40 requests per project per day.
 - Manual fallback.
 
 ### N-008 — Trainer review
 
-- Daily timeline.
-- Comments.
+- Selectable 14-day timeline.
+- Same-record meal correction.
+- Feedback saved against the selected meal and date.
 - Seven-day adherence summary.
 
 ### N-009 — Stabilization

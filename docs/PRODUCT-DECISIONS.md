@@ -1,11 +1,20 @@
-# CLOB Product Decisions
+# Morning Warrior Product Decisions
 
 This log records decisions that must remain consistent across chats and patches.
 The latest explicit Product Owner decision overrides an older conflicting one.
 
+## 2026-07-23 — Brand Architecture
+
+- `CLOB` remains the master brand.
+- `Morning Warrior` is the product and app name for the Trainer online system.
+- App-facing surfaces use `Morning Warrior`.
+- Ownership or endorsement surfaces may use `Morning Warrior by CLOB`.
+- Existing `clob` technical identifiers remain stable for compatibility and
+  also continue to reflect the master brand.
+
 ## 2026-07-23 — Dynamic Home / Daily Coaching App
 
-- CLOB is evolving from a Workout App into a `Daily Coaching App`.
+- Morning Warrior is evolving from a Workout App into a `Daily Coaching App`.
 - Member login opens one calm Home dashboard that answers: “What should I do
   next?”
 - Home is dynamic, not a fixed list of equally weighted widgets.
@@ -29,9 +38,9 @@ The latest explicit Product Owner decision overrides an older conflicting one.
 - Progress must let a member create and edit their own Check-in. A read-only
   Member Progress summary is not acceptable.
 
-## 2026-07-23 — CLOB v2 Product Direction
+## 2026-07-23 — Morning Warrior v2 Product Direction
 
-- CLOB v2 vision: “The most beautiful coaching app for personal trainers.”
+- Morning Warrior v2 vision: “The most beautiful coaching app for personal trainers.”
 - `Today's Mission` is the product core and signature.
 - Core principles: Momentum over Information, Beauty with Purpose, Color Leads
   Attention, Celebrate Small Wins and Coach First.

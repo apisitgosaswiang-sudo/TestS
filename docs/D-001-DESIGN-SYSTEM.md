@@ -1,4 +1,4 @@
-# D-001 — CLOB v2 Design System
+# D-001 — Morning Warrior v2 Design System
 
 Status: Dynamic Home and Member Progress reference complete  
 Product direction: Athletic Luxury with Momentum
@@ -48,6 +48,17 @@ Incomplete work is neutral. It is not an error and must not be shown in red.
 
 The first viewport must communicate the next action without requiring the
 member to interpret a dashboard or scan navigation.
+
+### Light-first priority card
+
+- Dynamic Home uses a warm neutral canvas and a light priority surface.
+- Hierarchy comes from type scale, spacing and one clear action—not a large
+  dark color block.
+- Rose is reserved for the next action and active progress.
+- Success, warning and error colors appear only on the earned state, border or
+  key number; they do not flood the whole card.
+- Dark surfaces remain selective signature moments elsewhere in the product,
+  not the default treatment for Member Home.
 
 ## Dynamic priority rules
 

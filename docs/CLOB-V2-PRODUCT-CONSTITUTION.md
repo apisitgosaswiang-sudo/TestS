@@ -1,17 +1,19 @@
-# CLOB v2 Product Constitution
+# Morning Warrior v2 Product Constitution
+
+Morning Warrior is the Trainer app under the CLOB master brand.
 
 ## Vision
 
 > The most beautiful coaching app for personal trainers.
 
-CLOB is not trying to become the fitness app with the most features. It is the
+Morning Warrior is not trying to become the fitness app with the most features. It is the
 coaching app that trainers use every day and members want to open every day.
 
 ## Product Core
 
-The daily coaching decision is the heart of CLOB.
+The daily coaching decision is the heart of Morning Warrior.
 
-People do not open CLOB only to inspect information. They open it to understand
+People do not open Morning Warrior only to inspect information. They open it to understand
 what matters now, take action and complete today's mission.
 
 `Today's Mission` defines the action model. `Dynamic Home` presents the most
@@ -52,7 +54,7 @@ Color directs the eye. It is not screen decoration.
 
 ### 4. Celebrate Small Wins
 
-CLOB responds when a user completes something meaningful, including:
+Morning Warrior responds when a user completes something meaningful, including:
 
 - Finish Workout
 - Protein Complete

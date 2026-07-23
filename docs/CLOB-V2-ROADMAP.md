@@ -1,4 +1,4 @@
-# CLOB v2 Roadmap
+# Morning Warrior v2 Roadmap
 
 ## Stabilization Gate
 
@@ -14,7 +14,7 @@
 
 ## Phase A — Foundation
 
-### D-001 — CLOB Design System
+### D-001 — Morning Warrior Design System
 
 - colors and semantic roles
 - typography
@@ -57,7 +57,7 @@ All Nutrition UI must use D-001 components.
 
 ## Phase C — Progress
 
-Unify trends, streaks, personal records and small wins under the CLOB v2 design
+Unify trends, streaks, personal records and small wins under the Morning Warrior v2 design
 language.
 
 Foundation shipped in Patch-011F:
