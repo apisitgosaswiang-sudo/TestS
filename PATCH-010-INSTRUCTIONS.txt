@@ -1,0 +1,38 @@
+CLOB v2 Patch-010 — Coach Security Stabilization
+
+Copy every file in this ZIP over the matching project path. Keep the folder
+structure unchanged.
+
+Changed files:
+- CHANGELOG-PATCH-010.md
+- PRODUCT.md
+- js/app.js
+- js/coach-session.js (new)
+- js/config.js
+- js/trainer-security.js
+- js/trainer-settings-page.js
+- js/views.js
+- sw.js
+
+New documentation:
+- docs/CLOB-V2-PRODUCT-CONSTITUTION.md
+- docs/CLOB-V2-ROADMAP.md
+- docs/PRODUCT-DECISIONS.md
+- docs/PATCH-010-QA.md
+
+What this patch changes:
+- Coach ID is entered before the six-digit Security PIN.
+- Invalid credentials use one generic error and do not reveal which field was wrong.
+- PBKDF2 + Salt verification remains in place; no plain-text PIN is added.
+- Five failed attempts still lock Coach access for fifteen minutes.
+- Local and Firebase lock states use the stricter active state.
+- Coach login persists across refresh and reopening the PWA.
+- There is no automatic session timeout.
+- Manual Logout clears the persistent Coach session.
+- Member Login and Member PIN are unchanged.
+
+After deploy:
+1. Open once in a Private/Incognito tab to verify the new version.
+2. Run docs/PATCH-010-QA.md.
+3. Fully close and reopen the installed PWA once so the new Service Worker cache
+   becomes active.

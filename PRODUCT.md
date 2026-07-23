@@ -1,5 +1,14 @@
 # CLOB Product Direction
 
+> CLOB v2 product decisions are governed by:
+>
+> - `docs/CLOB-V2-PRODUCT-CONSTITUTION.md`
+> - `docs/CLOB-V2-ROADMAP.md`
+> - `docs/PRODUCT-DECISIONS.md`
+>
+> If this legacy roadmap conflicts with an approved CLOB v2 decision, the
+> CLOB v2 documents take precedence.
+
 ## Vision
 
 CLOB คือแพลตฟอร์มที่เชื่อม Trainer และ Member เข้าด้วยกัน

@@ -1,4 +1,4 @@
-const CACHE_NAME = "clob-patch-009-mobile-avatar-nav-v1";
+const CACHE_NAME = "clob-v2-patch-010-coach-security-v1";
 
 const APP_SHELL = [
   "./",
@@ -10,6 +10,7 @@ const APP_SHELL = [
   "./css/app.css",
   "./js/app.js",
   "./js/config.js",
+  "./js/coach-session.js",
   "./js/firebase.js",
   "./js/profile-photo-service.js",
   "./js/router.js",
