@@ -29,6 +29,7 @@ export async function renderMemberHistoryPage(code) {
   const totalMinutes = completedSessions.reduce((sum, item) => sum + Math.max(0, Math.round((Number(item.completedAt || item.updatedAt || 0) - Number(item.startedAt || 0)) / 60000)), 0);
   const caloriesBurned = completedSessions.reduce((sum, item) => sum + Number(item.caloriesBurned || 0), 0);
   const latestWeekly = weekly[0] || null;
+  const dayGroups = groupSessionsByDay(sessions);
 
   app.innerHTML = `<main class="page trainer-page"><div class="member-detail-screen">
     <header class="member-detail-header">
@@ -57,28 +58,54 @@ export async function renderMemberHistoryPage(code) {
 
     <h3 class="history-section-label">ประวัติที่ผ่านมา</h3>
     <section class="history-list">
-      ${sessions.length ? sessions.map(historyCard).join("") : `
+      ${dayGroups.length ? dayGroups.map(dayGroupCard).join("") : `
         <div class="members-empty card"><div>▤</div><strong>ยังไม่มีประวัติการออกกำลังกาย</strong>
         <p>รายการจะปรากฏเมื่อสมาชิกเริ่มบันทึกอย่างน้อย 1 เซต</p></div>`}
     </section>
   </div></main>`;
   document.querySelector("#history-back").onclick = () => navigate(`/member-detail-${code}`);
   document.querySelector("#open-schedule").onclick = () => navigate(`/member-schedule-${code}`);
+  document.querySelectorAll("[data-day-key]").forEach((card) => {
+    card.addEventListener("click", () => navigate(`/member-workout-day-${code}-${card.dataset.dayKey}`));
+  });
 }
 
-function historyCard(session) {
-  const done = completedSets(session);
-  const total = totalSets(session);
+function dayKeyOf(session) {
   const date = new Date(Number(session.completedAt || session.updatedAt || Date.now()));
-  return `<article class="detail-card card">
-    <div class="detail-card-title"><div><h3>${escapeHtml(session.title || "Workout")}</h3>
-    <p>${date.toLocaleDateString("th-TH", { dateStyle: "medium" })}</p></div>
-    <span class="package-chip ${session.status === "completed" ? "package-active" : "package-expiring"}">${session.status === "completed" ? "COMPLETED" : "IN PROGRESS"}</span></div>
+  return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function groupSessionsByDay(sessions) {
+  const groups = {};
+  sessions.forEach((session) => {
+    const key = dayKeyOf(session);
+    if (!groups[key]) {
+      groups[key] = {
+        dayKey: key,
+        date: new Date(Number(session.completedAt || session.updatedAt || Date.now())),
+        sessions: []
+      };
+    }
+    groups[key].sessions.push(session);
+  });
+  return Object.values(groups).sort((a, b) => b.date - a.date);
+}
+
+function dayGroupCard(group) {
+  const totalDone = group.sessions.reduce((sum, s) => sum + completedSets(s), 0);
+  const totalAll = group.sessions.reduce((sum, s) => sum + totalSets(s), 0);
+  const allCompleted = group.sessions.every((s) => s.status === "completed");
+  const titles = [...new Set(group.sessions.map((s) => s.title || "Workout"))];
+
+  return `<button class="detail-card card history-day-card" type="button" data-day-key="${group.dayKey}">
+    <div class="detail-card-title"><div><h3>${group.date.toLocaleDateString("th-TH", { dateStyle: "medium" })}</h3>
+    <p>${group.sessions.length} Session · ${escapeHtml(titles.join(", "))}</p></div>
+    <span class="package-chip ${allCompleted ? "package-active" : "package-expiring"}">${allCompleted ? "COMPLETED" : "IN PROGRESS"}</span></div>
     <div class="detail-grid">
-      <div><span>เซตที่ทำ</span><strong>${done}/${total}</strong></div>
-      <div><span>ความสำเร็จ</span><strong>${total ? Math.round(done / total * 100) : 0}%</strong></div>
+      <div><span>เซตที่ทำ</span><strong>${totalDone}/${totalAll}</strong></div>
+      <div><span>ความสำเร็จ</span><strong>${totalAll ? Math.round(totalDone / totalAll * 100) : 0}%</strong></div>
     </div>
-  </article>`;
+  </button>`;
 }
 
 function completedSets(session) {

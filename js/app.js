@@ -29,6 +29,7 @@ import { restoreCoachSession } from "./coach-session.js";
 import { renderNutritionPage } from "./nutrition-page.js";
 import { renderTrainerNutritionPage } from "./trainer-nutrition-page.js";
 import { renderMemberHistoryPage } from "./member-history-page.js";
+import { renderMemberWorkoutDayPage } from "./member-workout-day-page.js";
 import { renderMemberSchedulePage } from "./member-schedule-page.js";
 import { renderMemberWorkoutHistoryPage } from "./member-workout-history-page.js";
 import { renderWorkoutOverviewPage } from "./workout-overview-page.js";
@@ -61,6 +62,7 @@ registerPatternRoute(/^\/weekly-checkins-([^/]+)$/, renderWeeklyCheckinPage);
 registerPatternRoute(/^\/progress-photos-([^/]+)$/, renderProgressPhotosPage);
 registerPatternRoute(/^\/progress-([^/]+)$/, renderProgressPage);
 registerPatternRoute(/^\/member-history-([^/]+)$/, renderMemberHistoryPage);
+registerPatternRoute(/^\/member-workout-day-([^-]+)-(\d{8})$/, renderMemberWorkoutDayPage);
 registerPatternRoute(/^\/member-schedule-([^/]+)$/, renderMemberSchedulePage);
 registerPatternRoute(/^\/program-builder-(.+)$/, renderProgramBuilder);
 registerRoute("/404", () => {
