@@ -1882,6 +1882,23 @@
   background: var(--primary-soft);
 }
 
+.member-program-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.history-list {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 32px;
+}
+
+.member-overview-card .detail-grid strong {
+  line-height: 1.35;
+}
+
 .builder-modal {
   position: fixed;
   z-index: 50;
