@@ -1,4 +1,4 @@
-const CACHE_NAME = "morning-warrior-v2-schedule-page";
+const CACHE_NAME = "morning-warrior-v2-core-exercise-photos";
 
 const APP_SHELL = [
   "./",
