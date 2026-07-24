@@ -140,36 +140,81 @@ export async function removeProgram(programId) {
   saveProgramsLocal(local);
 }
 
-export async function assignProgram(program, memberCode, effectiveDate) {
-  const payload = {
-    programId: program.id,
-    programName: program.name,
-    effectiveDate,
-    assignedAt: Date.now(),
-    status: "active"
-  };
-
-  localStorage.setItem(
-    `clob_member_program_${memberCode}`,
-    JSON.stringify(payload)
-  );
-
-  const saved = await assignProgramToMember(memberCode, payload);
-  if (!saved) throw new Error("Assign Program ลง Firebase ไม่สำเร็จ");
-  return payload;
-}
-
-export async function loadMemberProgram(memberCode) {
-  const remote = await getMemberProgram(memberCode);
-  if (remote) {
-    localStorage.setItem(`clob_member_program_${memberCode}`, JSON.stringify(remote));
-    return remote;
-  }
+function readLocalAssignment(memberCode) {
   try {
     return JSON.parse(localStorage.getItem(`clob_member_program_${memberCode}`) || "null");
   } catch {
     return null;
   }
+}
+
+// รองรับข้อมูลเก่าที่เคยเก็บเป็น "1 โปรแกรม/คน" (มี programId ตรงๆ)
+// แปลงให้กลายเป็นคิวที่มี 1 รายการ เพื่อไม่ให้ของเดิมพัง
+function normalizeAssignment(raw) {
+  if (!raw) return { queue: [], effectiveDate: "", assignedAt: 0, status: "unassigned" };
+
+  if (Array.isArray(raw.queue)) {
+    const queue = raw.queue.filter((item) => item && item.programId);
+    return {
+      queue,
+      effectiveDate: raw.effectiveDate || "",
+      assignedAt: Number(raw.assignedAt || 0),
+      status: raw.status || (queue.length ? "active" : "unassigned")
+    };
+  }
+
+  if (raw.programId) {
+    return {
+      queue: [{ programId: raw.programId, programName: raw.programName || "" }],
+      effectiveDate: raw.effectiveDate || "",
+      assignedAt: Number(raw.assignedAt || 0),
+      status: raw.status || "active"
+    };
+  }
+
+  return { queue: [], effectiveDate: "", assignedAt: 0, status: "unassigned" };
+}
+
+export async function loadMemberProgram(memberCode) {
+  const remote = await getMemberProgram(memberCode);
+  const normalized = normalizeAssignment(remote || readLocalAssignment(memberCode));
+  localStorage.setItem(`clob_member_program_${memberCode}`, JSON.stringify(normalized));
+  return normalized;
+}
+
+async function persistQueue(memberCode, queue, effectiveDate) {
+  const payload = {
+    queue,
+    effectiveDate: effectiveDate || new Date().toISOString().slice(0, 10),
+    assignedAt: Date.now(),
+    status: queue.length ? "active" : "unassigned"
+  };
+
+  localStorage.setItem(`clob_member_program_${memberCode}`, JSON.stringify(payload));
+  const saved = await assignProgramToMember(memberCode, payload);
+  if (!saved) throw new Error("บันทึกคิวโปรแกรมลง Firebase ไม่สำเร็จ");
+  return payload;
+}
+
+export async function addProgramToQueue(program, memberCode, effectiveDate) {
+  const current = normalizeAssignment(await loadMemberProgram(memberCode));
+  const queue = [...current.queue, { programId: program.id, programName: program.name }];
+  return persistQueue(memberCode, queue, current.effectiveDate || effectiveDate);
+}
+
+export async function removeQueueItem(memberCode, index) {
+  const current = normalizeAssignment(await loadMemberProgram(memberCode));
+  const queue = current.queue.filter((_, i) => i !== index);
+  return persistQueue(memberCode, queue, current.effectiveDate);
+}
+
+export async function moveQueueItem(memberCode, index, direction) {
+  const current = normalizeAssignment(await loadMemberProgram(memberCode));
+  const queue = [...current.queue];
+  const target = index + direction;
+  if (target < 0 || target >= queue.length) return current;
+  [queue[index], queue[target]] = [queue[target], queue[index]];
+  return persistQueue(memberCode, queue, current.effectiveDate);
 }
 
 export async function unassignProgram(memberCode) {

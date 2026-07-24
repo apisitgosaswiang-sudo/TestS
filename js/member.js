@@ -4,7 +4,8 @@ import {
   saveWorkoutSession,
   deleteWorkoutSession,
   getMemberProgram,
-  getPrograms
+  getPrograms,
+  getMemberWorkoutSessions
 } from "./firebase.js";
 
 const DEMO_MEMBERS = {
@@ -143,21 +144,75 @@ const DEFAULT_MEMBER = {
 };
 
 export async function loadMember(code) {
-  const [remote, assignment, programs] = await Promise.all([
+  const [remote, assignment, programs, remoteSessions] = await Promise.all([
     getMemberByCode(code),
     getMemberProgram(code),
-    getPrograms()
+    getPrograms(),
+    getMemberWorkoutSessions(code)
   ]);
   const source = remote || DEMO_MEMBERS[code] || DEFAULT_MEMBER;
-  if (assignment?.status === "active" && programs?.[assignment.programId]) {
-    source.workout = programToWorkout(programs[assignment.programId], assignment);
+  const activeProgram = resolveActiveProgram(assignment, programs, remoteSessions);
+  if (activeProgram) {
+    source.workout = programToWorkout(activeProgram, assignment, remoteSessions);
   }
   return normalizeMember(code, source);
 }
 
-function programToWorkout(program, assignment) {
+// เลือก "โปรแกรมที่ควรทำถัดไป" จากคิวโปรแกรมของสมาชิก (เช่น Upper > Full Body > Legs)
+// โดยดูจาก session ล่าสุดที่ทำสำเร็จของโปรแกรมไหนในคิว แล้วขยับไปโปรแกรมถัดไป
+// ถ้ายังไม่เคยทำเลย เริ่มจากโปรแกรมแรกในคิวเสมอ
+function resolveActiveProgram(assignment, programs, remoteSessions) {
+  if (assignment?.status !== "active") return null;
+
+  const queue = Array.isArray(assignment?.queue) ? assignment.queue : [];
+  const validQueue = queue.filter((item) => item?.programId && programs?.[item.programId]);
+  if (!validQueue.length) return null;
+  if (validQueue.length === 1) return programs[validQueue[0].programId];
+
+  const completed = Object.values(remoteSessions || {})
+    .filter((item) => item
+      && item.status === "completed"
+      && typeof item.workoutId === "string"
+      && validQueue.some((entry) => item.workoutId.startsWith(`${entry.programId}:`)))
+    .sort((a, b) => Number(b.completedAt || b.updatedAt || 0) - Number(a.completedAt || a.updatedAt || 0));
+
+  const lastCompleted = completed[0];
+  if (!lastCompleted) return programs[validQueue[0].programId];
+
+  const lastProgramId = lastCompleted.workoutId.split(":")[0];
+  const lastIndex = validQueue.findIndex((entry) => entry.programId === lastProgramId);
+  if (lastIndex === -1) return programs[validQueue[0].programId];
+
+  const nextIndex = (lastIndex + 1) % validQueue.length;
+  return programs[validQueue[nextIndex].programId];
+}
+
+// เลือกวันถัดไปภายในโปรแกรมเดียว (เผื่อโปรแกรมไหนมีมากกว่า 1 วัน)
+// ปกติแล้วแต่ละโปรแกรมในคิวจะมีวันเดียว ฟังก์ชันนี้จึงมักคืนวันแรกเสมอ
+function pickNextDay(program, days, remoteSessions) {
+  if (days.length <= 1) return days[0];
+
+  const prefix = `${program.id}:`;
+  const completed = Object.values(remoteSessions || {})
+    .filter((item) => item
+      && item.status === "completed"
+      && typeof item.workoutId === "string"
+      && item.workoutId.startsWith(prefix))
+    .sort((a, b) => Number(b.completedAt || b.updatedAt || 0) - Number(a.completedAt || a.updatedAt || 0));
+
+  const lastCompleted = completed[0];
+  if (!lastCompleted) return days[0];
+
+  const lastDayId = lastCompleted.workoutId.slice(prefix.length);
+  const lastIndex = days.findIndex((day) => day.id === lastDayId);
+  if (lastIndex === -1) return days[0];
+
+  return days[(lastIndex + 1) % days.length];
+}
+
+function programToWorkout(program, assignment, remoteSessions) {
   const days = Array.isArray(program.days) ? program.days : [];
-  const day = days[0] || { id: program.id, name: program.name, exercises: [] };
+  const day = pickNextDay(program, days, remoteSessions) || days[0] || { id: program.id, name: program.name, exercises: [] };
   return {
     id: `${program.id}:${day.id}`,
     title: day.name || program.name,

@@ -8,7 +8,7 @@ import {
   archiveProgram,
   restoreProgram,
   removeProgram,
-  assignProgram,
+  addProgramToQueue,
   addDay,
   removeDay,
   addExercise,
@@ -539,7 +539,7 @@ async function openAssignModal() {
     <div class="builder-modal-card">
       <div class="builder-modal-head">
         <div>
-          <p class="section-label">ASSIGN PROGRAM</p>
+          <p class="section-label">ADD TO QUEUE</p>
           <h2>${escapeHtml(currentProgram.name)}</h2>
         </div>
         <button id="close-assign-modal">×</button>
@@ -559,7 +559,7 @@ async function openAssignModal() {
         <input id="assign-date" type="date" value="${today}" />
       </label>
 
-      <button id="confirm-assign" class="button button-primary" ${members.length ? "" : "disabled"}>Assign Program</button>
+      <button id="confirm-assign" class="button button-primary" ${members.length ? "" : "disabled"}>เพิ่มเข้าคิว</button>
     </div>
   `;
 
@@ -572,11 +572,11 @@ async function openAssignModal() {
     const effectiveDate = document.querySelector("#assign-date").value;
     if (!memberCode) return;
     try {
-      await assignProgram(currentProgram, memberCode, effectiveDate);
+      await addProgramToQueue(currentProgram, memberCode, effectiveDate);
       modal.hidden = true;
-      showToast("Assign Program ให้สมาชิกแล้ว");
+      showToast("เพิ่มเข้าคิวโปรแกรมของสมาชิกแล้ว");
     } catch (error) {
-      showToast(error.message || "Assign Program ไม่สำเร็จ");
+      showToast(error.message || "เพิ่มเข้าคิวไม่สำเร็จ");
     }
   });
 }
