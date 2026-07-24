@@ -179,15 +179,10 @@ function bindProgramsPage() {
     });
   });
 
-  document.querySelector("#new-program").addEventListener("click", async () => {
+  document.querySelector("#new-program").addEventListener("click", () => {
     const program = createBlankProgram();
-    try {
-      await saveProgram(program);
-      programsCache.unshift(program);
-      navigate(`/program-builder-${program.id}`);
-    } catch (error) {
-      showToast(error.message || "สร้าง Program ไม่สำเร็จ");
-    }
+    programsCache.unshift(program);
+    navigate(`/program-builder-${program.id}`);
   });
 
   document.querySelector("#program-search").addEventListener("input", (event) => {
