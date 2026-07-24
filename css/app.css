@@ -1981,6 +1981,15 @@
   background: var(--primary-soft);
 }
 
+.history-section-label {
+  margin: 8px 2px 4px;
+  color: var(--muted);
+  font-size: .7rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
 .history-list {
   display: grid;
   gap: 12px;
