@@ -1,4 +1,4 @@
-const CACHE_NAME = "morning-warrior-v2-combined-hotfix-6";
+const CACHE_NAME = "morning-warrior-v2-schedule-page";
 
 const APP_SHELL = [
   "./",
@@ -22,6 +22,7 @@ const APP_SHELL = [
   "./js/members-page.js",
   "./js/member-today-page.js",
   "./js/member-history-page.js",
+  "./js/member-schedule-page.js",
   "./js/dynamic-home.js",
   "./js/emotion-design.js",
   "./js/nutrition.js",
