@@ -321,11 +321,7 @@ async function analyzeSelectedPhoto() {
   if (!preparedPhoto) return;
   const button = document.querySelector("#analyze-food-button");
   const errorBox = document.querySelector("#ai-food-error");
-  if (button.dataset.retry === "true" && !window.confirm("วิเคราะห์ใหม่จะใช้โควตา AI เพิ่มอีก 1 ครั้ง ต้องการดำเนินการต่อหรือไม่?")) {
-    return;
-  }
   button.disabled = true;
-  delete button.dataset.retry;
   button.querySelector("span").textContent = "AI กำลังประเมิน...";
   hideError(errorBox);
 
@@ -350,11 +346,12 @@ async function analyzeSelectedPhoto() {
     showError(errorBox, error.message || "AI วิเคราะห์ไม่สำเร็จ กรุณากรอกเอง");
     if (error?.clobCode === "AI_FAILED") {
       quota = await getAiQuotaState(code, dateKey());
-      button.dataset.retry = "true";
       button.disabled = Number(quota?.memberRemaining || 0) <= 0;
       button.querySelector("span").textContent = button.disabled
         ? "วันนี้ใช้ AI ครบแล้ว"
-        : "วิเคราะห์ใหม่ · ใช้โควตาเพิ่ม 1 ครั้ง";
+        : error?.quotaReleased
+          ? "ลองวิเคราะห์อีกครั้ง · คืนโควตาแล้ว"
+          : "ลองวิเคราะห์อีกครั้ง";
     } else if (error?.clobCode === "AI_QUOTA") {
       quota = await getAiQuotaState(code, dateKey());
       button.disabled = !quota.available;

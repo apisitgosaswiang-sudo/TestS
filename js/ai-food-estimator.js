@@ -120,17 +120,6 @@ export async function estimateFoodPhoto({
       optionalProperties: ["notes", "questions"]
     });
 
-    const ai = getAI(getFirebaseApp(), { backend: new GoogleAIBackend() });
-    const model = getGenerativeModel(ai, {
-      model: APP_CONFIG.aiFoodModel,
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: schema,
-        temperature: 0.2,
-        maxOutputTokens: 420
-      }
-    });
-
     const imagePart = {
       inlineData: {
         data: await blobToBase64(preparedPhoto.blob),
@@ -147,11 +136,17 @@ export async function estimateFoodPhoto({
       "This is an editable estimate, not medical advice."
     ].join(" ");
 
-    const result = await model.generateContent([prompt, imagePart]);
+    const ai = getAI(getFirebaseApp(), { backend: new GoogleAIBackend() });
+    const { result, modelName } = await generateWithModelFallback({
+      ai,
+      getGenerativeModel,
+      schema,
+      content: [prompt, imagePart]
+    });
     const parsed = JSON.parse(result.response.text());
     const estimate = sanitizeEstimate({
       ...parsed,
-      model: APP_CONFIG.aiFoodModel,
+      model: modelName,
       estimatedAt: Date.now()
     });
 
@@ -162,15 +157,16 @@ export async function estimateFoodPhoto({
       reused: false
     };
   } catch (error) {
+    let quotaReleased = true;
     if (reservation?.allowed) {
-      await releaseAiAnalysis(memberCode, selectedDate);
+      quotaReleased = await releaseAiAnalysis(memberCode, selectedDate);
     }
     if (error?.clobCode) throw error;
     console.warn("AI food estimation failed:", error);
     throw createAiError(
       "AI_FAILED",
-      friendlyAiError(error),
-      { cause: error }
+      friendlyAiError(error, { quotaReleased }),
+      { cause: error, quotaReleased }
     );
   }
 }
@@ -193,18 +189,88 @@ export function sanitizeEstimate(value = {}) {
   };
 }
 
-function friendlyAiError(error) {
-  const message = `${String(error?.code || "")} ${String(error?.message || "")}`;
+async function generateWithModelFallback({
+  ai,
+  getGenerativeModel,
+  schema,
+  content
+}) {
+  const modelNames = [
+    APP_CONFIG.aiFoodModel,
+    ...(Array.isArray(APP_CONFIG.aiFoodFallbackModels)
+      ? APP_CONFIG.aiFoodFallbackModels
+      : [])
+  ].map((name) => String(name || "").trim()).filter((name, index, values) => {
+    return Boolean(name) && values.indexOf(name) === index;
+  });
+
+  let lastError = null;
+  for (let index = 0; index < modelNames.length; index += 1) {
+    const modelName = modelNames[index];
+    const model = getGenerativeModel(ai, {
+      model: modelName,
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+        temperature: 0.2,
+        maxOutputTokens: 420
+      }
+    });
+
+    try {
+      return {
+        result: await model.generateContent(content),
+        modelName
+      };
+    } catch (error) {
+      lastError = error;
+      const hasFallback = index < modelNames.length - 1;
+      if (!hasFallback || !isRetryableModelError(error)) throw error;
+      console.warn("AI model temporarily unavailable; trying fallback:", {
+        model: modelName,
+        code: String(error?.code || "unknown")
+      });
+    }
+  }
+
+  throw lastError || new Error("No AI food model is configured.");
+}
+
+function isRetryableModelError(error) {
+  const message = providerErrorText(error);
+  return /429|resource.?exhausted|quota|rate.?limit|capacity|overload|503|unavailable|404|not.?found/i.test(message);
+}
+
+function providerErrorText(error) {
+  const parts = [];
+  let current = error;
+  let depth = 0;
+  while (current && depth < 3) {
+    parts.push(String(current.code || ""), String(current.message || ""));
+    current = current.cause;
+    depth += 1;
+  }
+  return parts.join(" ");
+}
+
+function friendlyAiError(error, { quotaReleased = false } = {}) {
+  const message = providerErrorText(error);
+  const quotaNote = quotaReleased
+    ? " ระบบคืนโควตา Morning Warrior ครั้งนี้แล้ว"
+    : "";
   if (/app.?check|recaptcha|attestation|403|permission/i.test(message)) {
     return "App Check ยังยืนยันเว็บไซต์นี้ไม่สำเร็จ กรุณาปิด–เปิดแอปแล้วลองอีกครั้ง";
   }
-  if (/429|quota|rate/i.test(message)) {
-    return "โควตา AI ชั่วคราวเต็มแล้ว กรุณากรอกอาหารเอง";
+  if (/429|resource.?exhausted|quota|rate.?limit|capacity|overload/i.test(message)) {
+    return `บริการ AI ของ Google ยังไม่พร้อมชั่วคราว (429)${quotaNote} กรุณาลองอีกครั้ง`;
+  }
+  if (/503|unavailable|404|not.?found/i.test(message)) {
+    return `โมเดล AI ยังไม่พร้อมใช้งานชั่วคราว${quotaNote} กรุณาลองอีกครั้ง`;
   }
   if (/network|fetch|offline/i.test(message)) {
-    return "อินเทอร์เน็ตไม่พร้อมสำหรับ AI กรุณากรอกอาหารเอง";
+    return `อินเทอร์เน็ตไม่พร้อมสำหรับ AI${quotaNote} กรุณาลองอีกครั้ง`;
   }
-  return "AI วิเคราะห์รูปนี้ไม่สำเร็จ กรุณากรอกหรือแก้ข้อมูลอาหารเอง";
+  return `AI วิเคราะห์รูปนี้ไม่สำเร็จ${quotaNote} กรุณาลองอีกครั้งหรือกรอกอาหารเอง`;
 }
 
 function safeNumber(value) {
